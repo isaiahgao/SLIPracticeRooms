@@ -113,6 +113,7 @@ public class GUIBase extends GUI implements ActionListener {
         }
         
         // handle special buttons
+        // this one is unused
         if (this.getPressedButtonID() == -1) {
             if (Main.getUserHandler().getUserData(this.getCurrentId()) == null) {
                 this.instance.sendMessage("You can't remove your info from our database\\nbecause you're not registered with JHUnions!");
@@ -165,8 +166,7 @@ public class GUIBase extends GUI implements ActionListener {
         int buttonHeight = buttonHeightOffset - 10;
         
         //x, y, width, height
-        this.addPracticeRoomButton(-1, "Remove My Info", 60, bsy - buttonHeight / 2, buttonWidth, buttonHeight / 2 - 5);
-        this.addPracticeRoomButton(-2, "Update My Info", buttonWidth + 70, bsy - buttonHeight / 2, buttonWidth, buttonHeight / 2 - 5);
+        this.addPracticeRoomButton(-2, "Update My Info", 60, bsy - buttonHeight / 2, buttonWidth * 2 + 10, buttonHeight / 2 - 5);
         
         this.addPracticeRoomButton(109, 60, bsy, buttonWidth, buttonHeight);
         this.addPracticeRoomButton(110, 60, bsy + buttonHeightOffset, buttonWidth, buttonHeight);
@@ -199,7 +199,7 @@ public class GUIBase extends GUI implements ActionListener {
         // set component bounds(only needed by Absolute Positioning)
         //this.register.setBounds(525, 210, 180, 85);
         //this.useOnce.setBounds(725, 210, 180, 85);
-        this.textStepOne.setBounds(, 30, 500, 100);
+        this.textStepOne.setBounds(250, 30, 500, 100);
         this.textStepTwo.setBounds(700, 30, 500, 100);
         this.textStepOneInfo.setBounds(250, 90, 250, 200);
         this.textStepTwoInfo.setBounds(750, 90, 250, 200);
@@ -216,6 +216,8 @@ public class GUIBase extends GUI implements ActionListener {
     private void setupKeyListener(JComponent c) {
         c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(';'), "start");
         c.getActionMap().put("start", new AbstractAction() {
+            private static final long serialVersionUID = 8708730083077254773L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("started collection");
@@ -229,6 +231,8 @@ public class GUIBase extends GUI implements ActionListener {
 
             final int j = i;
             c.getActionMap().put(i, new AbstractAction() {
+                private static final long serialVersionUID = 1148616746542133372L;
+
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     System.out.println("key pressed " + j);
@@ -238,6 +242,8 @@ public class GUIBase extends GUI implements ActionListener {
         }
         c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke('?'), "stop");
         c.getActionMap().put("stop", new AbstractAction() {
+            private static final long serialVersionUID = 5914194104905979306L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("stopped collection");
