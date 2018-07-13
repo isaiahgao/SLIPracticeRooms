@@ -13,15 +13,12 @@ import java.util.Map;
 import com.google.api.services.sheets.v4.Sheets.Spreadsheets;
 import com.google.api.services.sheets.v4.model.AddSheetRequest;
 import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
-import com.google.api.services.sheets.v4.model.CellData;
-import com.google.api.services.sheets.v4.model.GridCoordinate;
 import com.google.api.services.sheets.v4.model.Request;
-import com.google.api.services.sheets.v4.model.RowData;
 import com.google.api.services.sheets.v4.model.Sheet;
 import com.google.api.services.sheets.v4.model.SheetProperties;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
-import com.google.api.services.sheets.v4.model.UpdateCellsRequest;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import com.google.common.collect.Lists;
 
 import sli.isaiahgao.Main;
 import sli.isaiahgao.Utils;
@@ -70,6 +67,10 @@ public class HandlerRoomData {
         
         this.login(usd, room);
         return ActionResult.LOG_IN;
+    }
+    
+    public boolean usingRoom(String id) {
+        return this.currentUsers.containsKey(id);
     }
     
     // log in
@@ -176,30 +177,37 @@ public class HandlerRoomData {
             List<Request> req = new ArrayList<>();
             req.add(new Request().setAddSheet(new AddSheetRequest().setProperties(prop)));
             
-            List<RowData> rd = new ArrayList<>();
-            List<CellData> cd = new ArrayList<>();
-            cd.add(new CellData().setFormattedValue("Timestamp"));
-            cd.add(new CellData().setFormattedValue("Name (First and Last)"));
-            cd.add(new CellData().setFormattedValue("JHED E-mail"));
-            cd.add(new CellData().setFormattedValue("Phone Number"));
-            cd.add(new CellData().setFormattedValue("Room"));
-            cd.add(new CellData().setFormattedValue("Current Time"));
-            cd.add(new CellData().setFormattedValue("Agreement"));
-            cd.add(new CellData().setFormattedValue("Time Key Returned"));
-            cd.add(new CellData().setFormattedValue("Monitor Name upon Return"));
-            cd.add(new CellData().setFormattedValue("Comments"));
-            rd.add(new RowData().setValues(cd));
-            
-            req.add(new Request().setUpdateCells(new UpdateCellsRequest()
-                    .setStart(new GridCoordinate().setSheetId(id))
-                    .setRows(rd)
-                    ));
-            
             try {
                 accessor.batchUpdate(instance.getLogURL(), new BatchUpdateSpreadsheetRequest().setRequests(req)).execute();
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
+            }
+            
+            // write the header data
+            List<List<Object>> values = new ArrayList<>();
+            values.add(Lists.newArrayList(
+                    "Timestamp",
+                    "Name",
+                    "JHED E-mail",
+                    "Phone Number",
+                    "Room",
+                    "Current Time",
+                    "Agreement",
+                    "Time Returned",
+                    "Monitor Name Upon Return",
+                    "Comments"
+                    ));
+            String range = matching + "!A1:J1";
+            ValueRange body = new ValueRange().setValues(values);
+            try {
+                accessor.values()
+                    .update(instance.getLogURL(), range, body)
+                    .setValueInputOption("RAW")
+                    .execute();
+            } catch (IOException e) {
+                System.err.println("Connection failed; attempting to re-establish...");
+                // TODO re-establish connection and queue the data push
             }
         }
     }

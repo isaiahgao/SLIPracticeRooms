@@ -59,7 +59,7 @@ public class UserInstance {
                 this.who.getPhone(),
                 "Room " + this.room,
                 time,
-                "I agree.");
+                "I agree");
     }
 
 }

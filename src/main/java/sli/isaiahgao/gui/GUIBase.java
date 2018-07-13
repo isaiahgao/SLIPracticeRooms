@@ -87,6 +87,13 @@ public class GUIBase extends GUI implements ActionListener {
             id = id.substring(0, id.length() - 1);
         }
         
+        if (Main.getRoomHandler().usingRoom(id)) {
+            // sign out if using a room
+            Main.getRoomHandler().scan(Main.getUserHandler().getUserData(id), 0);
+            this.setPressedButton(null);
+            return;
+        }
+        
         JButton pressed = this.getPressedButton();
         if (pressed == null) {
             this.instance.sendMessage("Please choose an option on the left, <i>then</i> swipe your JCard!");
@@ -144,7 +151,8 @@ public class GUIBase extends GUI implements ActionListener {
             return;
         }
         
-        // TODO log room as used
+        // sign in
+        Main.getRoomHandler().scan(usd, this.buttonPressed);
         
         // reset button selection
         this.setPressedButton(null);
