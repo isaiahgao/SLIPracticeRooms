@@ -15,11 +15,11 @@ public final class Main {
     private static HandlerUserData handlerUsers;
     private static Main instance;
     private final String DB_ID = "1bESGU8NWtu4feYrR7bYHhIib2y_a5iNOJfwiDhcF6vI";
-    private final String LOG_ID = "";
+    private final String LOG_ID = "1a_0sD8cijhYPAaci_tPuohCgQpfVnvpFD-SPqagUsgI";//"1MdkPLOyFvOqKnkpwT7ML-vzmog7dBqBLK7i8wH-u-Mg";
 
     public static void main(String[] args) {
         try {
-            //SheetsIO.init();
+            SheetsIO.init();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
