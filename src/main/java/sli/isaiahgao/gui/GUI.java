@@ -1,5 +1,8 @@
 package sli.isaiahgao.gui;
 
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -17,6 +20,13 @@ public abstract class GUI extends JPanel {
         this.frame.setTitle(title);
         this.frame.setSize(width, height);
         this.setup();
+        
+        try {
+            this.frame.setIconImage(ImageIO.read(this.getClass().getResourceAsStream("/logo.png")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
         this.frame.setVisible(visible);
         this.frame.getContentPane().add(this);
         this.frame.pack();

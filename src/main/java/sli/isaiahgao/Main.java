@@ -7,15 +7,19 @@ import sli.isaiahgao.data.HandlerUserData;
 import sli.isaiahgao.gui.GUIBase;
 import sli.isaiahgao.gui.GUIConfirm;
 import sli.isaiahgao.gui.GUIMessage;
+import sli.isaiahgao.io.ActionThread;
+import sli.isaiahgao.io.QueueIO;
 import sli.isaiahgao.io.SheetsIO;
 
 public final class Main {
 
+    private static ActionThread actionThread;
     private static HandlerRoomData handlerRoom;
     private static HandlerUserData handlerUsers;
+    private static QueueIO ioQueue;
     private static Main instance;
-    private final String DB_ID = "1bESGU8NWtu4feYrR7bYHhIib2y_a5iNOJfwiDhcF6vI";
-    private final String LOG_ID = "1a_0sD8cijhYPAaci_tPuohCgQpfVnvpFD-SPqagUsgI";//"1MdkPLOyFvOqKnkpwT7ML-vzmog7dBqBLK7i8wH-u-Mg";
+    private static final String DB_ID = "1bESGU8NWtu4feYrR7bYHhIib2y_a5iNOJfwiDhcF6vI";
+    private static final String LOG_ID = "1a_0sD8cijhYPAaci_tPuohCgQpfVnvpFD-SPqagUsgI";//"1MdkPLOyFvOqKnkpwT7ML-vzmog7dBqBLK7i8wH-u-Mg";
 
     public static void main(String[] args) {
         try {
@@ -25,11 +29,17 @@ public final class Main {
             System.exit(1);
         }
         
+        actionThread = new ActionThread();
         instance = new Main();
-        //handlerRoom = new HandlerRoomData(instance);
-        //handlerUsers = new HandlerUserData(instance);
-        //handlerUsers.load();
+        handlerRoom = new HandlerRoomData(instance);
+        handlerUsers = new HandlerUserData(instance);
+        handlerUsers.load();
+        ioQueue = new QueueIO();
         instance.base = new GUIBase(instance);
+    }
+    
+    public static ActionThread getActionThread() {
+        return actionThread;
     }
     
     public static HandlerRoomData getRoomHandler() {
@@ -38,6 +48,10 @@ public final class Main {
     
     public static HandlerUserData getUserHandler() {
         return handlerUsers;
+    }
+    
+    public static QueueIO getIOQueue() {
+        return ioQueue;
     }
     
     public Main() {
@@ -55,23 +69,23 @@ public final class Main {
     }
     
     public void sendMessage(String s, JFrame todispose, Runnable runafter) {
-        new GUIMessage(this, "<html><center><font size=\"12\" face=\"verdana\"" + s.replace("\\n", "<br>") + "</font></center></html>", todispose, runafter);
+        new GUIMessage(this, Utils.format(s, 12, "verdana", true), todispose, runafter);
     }
     
     public void sendConfirm(String s, JFrame todispose, Runnable runafter) {
-        new GUIConfirm(this, "<html><center><font size=\"12\" face=\"verdana\"" + s.replace("\\n", "<br>") + "</font></center></html>", todispose, runafter);
+        new GUIConfirm(this, Utils.format(s, 12, "verdana", true), todispose, runafter);
     }
     
     public GUIBase getBaseGUI() {
         return base;
     }
 
-    public String getDatabaseURL() {
-        return this.DB_ID;
+    public static String getDatabaseURL() {
+        return DB_ID;
     }
 
-    public String getLogURL() {
-        return this.LOG_ID;
+    public static String getLogURL() {
+        return LOG_ID;
     }
 
 }

@@ -75,6 +75,10 @@ public class GUIBase extends GUI implements ActionListener {
         }
         this.buttonPressed = butt == null ? 0 : Integer.parseInt(butt.getName());
     }
+    
+    public void setButtonEnabled(int button, boolean enabled) {
+        this.buttons.get(button).setEnabled(enabled);
+    }
 
     public void scanID(String id) {
         System.out.println(id);
@@ -89,7 +93,7 @@ public class GUIBase extends GUI implements ActionListener {
         
         if (Main.getRoomHandler().usingRoom(id)) {
             // sign out if using a room
-            Main.getRoomHandler().scan(Main.getUserHandler().getUserData(id), 0);
+            Main.getRoomHandler().scan(Main.getRoomHandler().getUserInstance(id).getUser(), 0);
             this.setPressedButton(null);
             return;
         }
@@ -140,6 +144,7 @@ public class GUIBase extends GUI implements ActionListener {
         }
         
         if (this.getPressedButtonID() == -2) {
+            System.out.println("curid: " + this.getCurrentId());
             // update user info
             if (Main.getUserHandler().getUserData(this.getCurrentId()) == null) {
                 // if they're not in system, prompt to register instead
@@ -170,11 +175,11 @@ public class GUIBase extends GUI implements ActionListener {
         int bsy = h / 4;
 
         int buttonHeightOffset = (h - bsy - 50) / 6;
-        int buttonWidth = w / 4 - 10;
+        int buttonWidth = w / 2 - 100;
         int buttonHeight = buttonHeightOffset - 10;
         
         //x, y, width, height
-        this.addPracticeRoomButton(-2, "Update My Info", 60, bsy - buttonHeight / 2, buttonWidth * 2 + 10, buttonHeight / 2 - 5);
+        this.addPracticeRoomButton(-2, Utils.format("Update My Info", 16, "Teen"), 60, bsy - buttonHeight / 2, buttonWidth * 2 + 10, buttonHeight / 2 - 5);
         
         this.addPracticeRoomButton(109, 60, bsy, buttonWidth, buttonHeight);
         this.addPracticeRoomButton(110, 60, bsy + buttonHeightOffset, buttonWidth, buttonHeight);
@@ -187,9 +192,9 @@ public class GUIBase extends GUI implements ActionListener {
         this.addPracticeRoomButton(118, buttonWidth + 70, bsy + 3 * buttonHeightOffset, buttonWidth, buttonHeight);
         this.addPracticeRoomButton(119, buttonWidth + 70, bsy + 4 * buttonHeightOffset, buttonWidth, buttonHeight);
 
-        this.textStepOne = new JLabel(Utils.format("Step ONE:", 36, "arial black"));
+        this.textStepOne = new JLabel(Utils.format("Step ONE:", 28, "arial black"));
         this.textStepOneInfo = new JLabel(Utils.format("Select Room!", 48, "verdana"));
-        this.textStepTwo = new JLabel(Utils.format("Step TWO:", 36, "arial black"));
+        this.textStepTwo = new JLabel(Utils.format("Step TWO:", 28, "arial black"));
         this.textStepTwoInfo = new JLabel(Utils.format("Swipe J-Card!", 48, "verdana"));
 
         // adjust size and set layout
@@ -207,10 +212,11 @@ public class GUIBase extends GUI implements ActionListener {
         // set component bounds(only needed by Absolute Positioning)
         //this.register.setBounds(525, 210, 180, 85);
         //this.useOnce.setBounds(725, 210, 180, 85);
-        this.textStepOne.setBounds(250, 30, 500, 100);
-        this.textStepTwo.setBounds(700, 30, 500, 100);
-        this.textStepOneInfo.setBounds(250, 90, 250, 200);
-        this.textStepTwoInfo.setBounds(750, 90, 250, 200);
+        this.textStepOne.setBounds(w / 6, 50, 500, 100);
+        this.textStepOneInfo.setBounds(w / 6 - 50, 70, 500, 200);
+        
+        this.textStepTwo.setBounds(w * 5 / 8, 50, 500, 100);
+        this.textStepTwoInfo.setBounds(w * 5 / 8 - 50, 70, 500, 200);
 
         // KeyListener kl = new JCardScanListener(this);
         // this.addKeyListener(kl);
@@ -297,11 +303,12 @@ public class GUIBase extends GUI implements ActionListener {
     }
 
     private String getTitle(int roomNo) {
+        String s = "" + roomNo;
         if (roomNo > 111)
-            return roomNo + " [PIANO]";
-        if (roomNo == 109)
-            return roomNo + " [DRUM]";
-        return "" + roomNo;
+            s += "\\nPIANO";
+        else if (roomNo == 109)
+            s += "\\nDRUM";
+        return Utils.format(s, 20, "Teen", true);
     }
 
     @Override

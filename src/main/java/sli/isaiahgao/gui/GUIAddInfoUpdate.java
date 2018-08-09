@@ -12,12 +12,15 @@ public class GUIAddInfoUpdate extends GUIAddInfo {
 
     public GUIAddInfoUpdate(Main instance, String userId, GUIBase base) {
         super(instance, base, "Update my Information", userId, "Update my Information", "OK");
+        this.postSetup();
     }
     
     @Override
     protected void setup() {
         super.setup();
-        
+    }
+    
+    private void postSetup() {
         UserData usd = Main.getUserHandler().getUserData(this.userId);
         this.promptFirstName.setText(usd.getName().getFirstName());
         this.promptLastName.setText(usd.getName().getLastName());

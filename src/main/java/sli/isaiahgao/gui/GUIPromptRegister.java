@@ -49,7 +49,7 @@ public class GUIPromptRegister extends GUI implements ActionListener {
         buttonUseOnce.addActionListener(this);
         
         textUpper = new JLabel ("<html><center><font size=\"16\" face=\"verdana\">You have not yet registered with JHUnions.<br>Would you like to register?</font></center></html>");
-        textRegister = new JLabel ("<html><font size=\"5\" face=\"verdana\">Registering saves your information in our database, and allows you to simply <i>click, swipe, n' go</i> each time you want to use a practice room!</font></html>");
+        textRegister = new JLabel ("<html><font size=\"5\" face=\"verdana\">Registering saves your JCard number and info in our database, and allows you to simply <i>click, swipe, n' go</i> each time you want to use a practice room!</font></html>");
         textUseOnce = new JLabel ("<html><font size=\"5\" face=\"verdana\">If you don't want to register right now, you may choose to fill out the necessary information to use the practice room for this time only. Your information will not be stored in our database with this option, and you will need to re-input your information for future visits.</font></html>");
 
         //adjust size and set layout

@@ -20,11 +20,15 @@ public class Utils {
     }
     
     public static String format(String msg) {
-        return format(msg, 16, "verdana");
+        return format(msg, 16, "verdana", false);
+    }
+    
+    public static String format(String msg, int fontSize, String fontStyle) {
+        return format(msg, fontSize, fontStyle, false);
     }
     //<span style='font-size:20px'
-    public static String format(String msg, int fontSize, String fontStyle) {
-        return "<html><font face=\"" + fontStyle + "\"><span style='font-size:" + fontSize + "px'>" + msg.replace("\\n", "<br>") + "</span></font></html>";
+    public static String format(String msg, int fontSize, String fontStyle, boolean center) {
+        return "<html>" + (center ? "<center>" : "") + "<font face=\"" + fontStyle + "\"><span style='font-size:" + fontSize + "px'>" + msg.replace("\\n", "<br>") + "</span></font>" + (center ? "</center>" : "") + "</html>";
     }
     
     public static String capitalizeFirst(String str) {

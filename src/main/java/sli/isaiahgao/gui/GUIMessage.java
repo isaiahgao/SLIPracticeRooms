@@ -25,6 +25,7 @@ public class GUIMessage extends GUI implements ActionListener, WindowListener {
         this.frame.addWindowListener(this);
         this.todispose = todispose;
         this.runafter = runafter;
+        this.text.setText(this.info);
     }
     
     private String info;
@@ -52,7 +53,9 @@ public class GUIMessage extends GUI implements ActionListener, WindowListener {
         
         //set component bounds(only needed by Absolute Positioning)
         button.setBounds(110, 165, 185, 50);
-        text.setBounds(0, 45, 400, 25);
+        text.setBounds(50, 25, 300, 100);
+        this.frame.setLocation(500, 500);
+        this.frame.setResizable(false);
     }
 
     @Override

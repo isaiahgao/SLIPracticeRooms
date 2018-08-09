@@ -30,6 +30,9 @@ public abstract class GUIAddInfo extends GUI implements ActionListener {
         this.confirm = confirm;
         this.userId = userId;
         this.base = base;
+        
+        this.buttonOK.setText(confirm);
+        this.textTitle.setText(line);
     }
     
     protected String line = "Register with JHUnions";

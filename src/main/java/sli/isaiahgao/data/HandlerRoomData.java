@@ -22,6 +22,8 @@ import com.google.common.collect.Lists;
 
 import sli.isaiahgao.Main;
 import sli.isaiahgao.Utils;
+import sli.isaiahgao.io.Action;
+import sli.isaiahgao.io.QueueIO.IODestination;
 import sli.isaiahgao.io.SheetsIO;
 
 public class HandlerRoomData {
@@ -49,8 +51,12 @@ public class HandlerRoomData {
     
     // user string id : userinstance
     private Map<String, UserInstance> currentUsers;
-    private int logsize;
+    private volatile int logsize;
     private Month month;
+    
+    private synchronized void incLog() {
+        this.logsize++;
+    }
     
     /**
      * Handle an ID scan.
@@ -58,40 +64,44 @@ public class HandlerRoomData {
      * @param room The room the user is checking out, or 0 if none.
      * @return Result of action, either LOG_IN or LOG_OUT.
      */
-    public ActionResult scan(UserData usd, int room) {
+    public synchronized ActionResult scan(UserData usd, int room) {
         UserInstance inst = this.currentUsers.get(usd.getHopkinsID());
         if (inst != null) {
             this.logout(inst);
+            instance.getBaseGUI().getButtonByID(inst.getRoom()).setEnabled(true);
+            // TODO play sign-out sound
             return ActionResult.LOG_OUT;
         }
         
         this.login(usd, room);
+        instance.getBaseGUI().getButtonByID(room).setEnabled(false);
+        // TODO play sign-in sound
         return ActionResult.LOG_IN;
     }
     
-    public boolean usingRoom(String id) {
+    public synchronized UserInstance getUserInstance(String id) {
+        return this.currentUsers.get(id);
+    }
+    
+    public synchronized boolean usingRoom(String id) {
         return this.currentUsers.containsKey(id);
     }
     
     // log in
-    private void login(UserData usd, int room) {
+    private synchronized void login(UserData usd, int room) {
         UserInstance inst = new UserInstance(usd, room);
         currentUsers.put(usd.getHopkinsID(), inst);
-        try {
-            this.push(inst);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.push(inst);
     }
     
     // log out
-    private void logout(UserInstance inst) {
+    private synchronized void logout(UserInstance inst) {
         currentUsers.remove(inst.getUser().getHopkinsID());
         this.poll(inst);
     }
     
     // fill in Time In and Monitor Initials in database
-    private void poll(UserInstance inst) {
+    private synchronized void poll(UserInstance inst) {
         Spreadsheets accessor = SheetsIO.getService().spreadsheets();
         String range = inst.getSheetName() + "!H" + inst.getLine() + ":I" + inst.getLine();
         
@@ -99,35 +109,33 @@ public class HandlerRoomData {
                 Utils.getTime(new Date()), "AUTO LOG"
                 ));
         ValueRange vr = new ValueRange().setValues(values);
-        try {
-            accessor.values().update(instance.getLogURL(), range, vr)
-                .setValueInputOption("RAW")
-                .execute();
-        } catch (IOException e) {
-            System.err.println("Connection failed; attempting to re-establish...");
-            e.printStackTrace();
-            // TODO re-establish connection and queue the data push
-        }
+        Action action = () -> {
+            accessor.values().update(Main.getLogURL(), range, vr)
+            .setValueInputOption("RAW")
+            .execute();
+        };
+        
+        Main.getActionThread().addAction(action);
     }
     
     // handle IO for logging in
-    private void push(UserInstance inst) throws IOException {
+    private synchronized void push(UserInstance inst) {
         Spreadsheets accessor = SheetsIO.getService().spreadsheets();
         this.checkMonth(accessor);
         this.logUser(accessor, inst);
     }
     
     // fill in user data
-    private void logUser(Spreadsheets accessor, UserInstance inst) {
+    private synchronized void logUser(Spreadsheets accessor, UserInstance inst) {
         if (this.logsize == 0) {
             try {
-                ValueRange vr = accessor.values().get(instance.getLogURL(), "A:A").execute();
+                ValueRange vr = accessor.values().get(Main.getLogURL(), "A:A").execute();
                 this.logsize = vr.getValues() == null ? 0 : vr.getValues().size();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        ++this.logsize;
+        this.incLog();
         // save line that we're putting data on
         inst.setLine(this.logsize);
         
@@ -138,78 +146,81 @@ public class HandlerRoomData {
         );
         String range = "A" + this.logsize + ":J" + this.logsize;
         ValueRange body = new ValueRange().setValues(values);
-        try {
+        Action action = () -> {
             accessor.values()
-                .update(instance.getLogURL(), range, body)
+                .update(Main.getLogURL(), range, body)
                 .setValueInputOption("RAW")
                 .execute();
-        } catch (IOException e) {
-            System.err.println("Connection failed; attempting to re-establish...");
-            // TODO re-establish connection and queue the data push
-        }
+        };
+        
+        Main.getActionThread().addAction(action);
     }
     
     // check if a new month is needed
-    private void checkMonth(Spreadsheets accessor) throws IOException {
-        if (this.month == null || Month.of(Calendar.getInstance().get(Calendar.MONTH) + 1) != this.month) {
-            // see if we need to create a new spreadsheet
-            this.month = Month.of(Calendar.getInstance().get(Calendar.MONTH) + 1);
-            String matching = Utils.capitalizeFirst(this.month.toString()) + " " + Calendar.getInstance().get(Calendar.YEAR);
-            
-            Spreadsheet ss = accessor.get(instance.getLogURL()).execute();
-            for (Sheet s : ss.getSheets()) {
-                if (s.getProperties().getTitle().equals(matching)) {
-                    // we have a sheet for the current month; proceed as usual
-                    return;
+    private synchronized void checkMonth(Spreadsheets accessor) {
+        Action bulk = () -> {
+            if (this.month == null || Month.of(Calendar.getInstance().get(Calendar.MONTH) + 1) != this.month) {
+                // see if we need to create a new spreadsheet
+                this.month = Month.of(Calendar.getInstance().get(Calendar.MONTH) + 1);
+                String matching = Utils.capitalizeFirst(this.month.toString()) + " " + Calendar.getInstance().get(Calendar.YEAR);
+                
+                Spreadsheet ss = accessor.get(Main.getLogURL()).execute();
+                for (Sheet s : ss.getSheets()) {
+                    if (s.getProperties().getTitle().equals(matching)) {
+                        // we have a sheet for the current month; proceed as usual
+                        return;
+                    }
+                }
+                
+                //otherwise create the new sheet
+                
+                // generate properties
+                SheetProperties prop = new SheetProperties();
+                prop.setTitle(matching);
+                prop.setIndex(0);
+                
+                int id = this.month.getValue() << 24 | Calendar.getInstance().get(Calendar.YEAR);
+                prop.setSheetId(id);
+                
+                List<Request> req = new ArrayList<>();
+                req.add(new Request().setAddSheet(new AddSheetRequest().setProperties(prop)));
+                
+                // write the header data
+                List<List<Object>> values = new ArrayList<>();
+                values.add(Lists.newArrayList(
+                        "Timestamp",
+                        "Name",
+                        "JHED E-mail",
+                        "Phone Number",
+                        "Room",
+                        "Current Time",
+                        "Agreement",
+                        "Time Returned",
+                        "Monitor Name Upon Return",
+                        "Comments"
+                        ));
+                String range = matching + "!A1:J1";
+                ValueRange body = new ValueRange().setValues(values);
+                
+                // create the action
+                Action action = () -> {
+                    accessor.batchUpdate(Main.getLogURL(), new BatchUpdateSpreadsheetRequest().setRequests(req)).execute();
+    
+                    accessor.values()
+                        .update(Main.getLogURL(), range, body)
+                        .setValueInputOption("RAW")
+                        .execute();
+                };
+                
+                try {
+                    action.run();
+                } catch (IOException e) {
+                    System.err.println("Connection failed; attempting to re-establish...");
+                    Main.getIOQueue().pushRequest(IODestination.LOG, action);
                 }
             }
-            
-            //otherwise create the new sheet
-            
-            // generate properties
-            SheetProperties prop = new SheetProperties();
-            prop.setTitle(matching);
-            prop.setIndex(0);
-            
-            int id = this.month.getValue() << 24 | Calendar.getInstance().get(Calendar.YEAR);
-            prop.setSheetId(id);
-            
-            List<Request> req = new ArrayList<>();
-            req.add(new Request().setAddSheet(new AddSheetRequest().setProperties(prop)));
-            
-            try {
-                accessor.batchUpdate(instance.getLogURL(), new BatchUpdateSpreadsheetRequest().setRequests(req)).execute();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            
-            // write the header data
-            List<List<Object>> values = new ArrayList<>();
-            values.add(Lists.newArrayList(
-                    "Timestamp",
-                    "Name",
-                    "JHED E-mail",
-                    "Phone Number",
-                    "Room",
-                    "Current Time",
-                    "Agreement",
-                    "Time Returned",
-                    "Monitor Name Upon Return",
-                    "Comments"
-                    ));
-            String range = matching + "!A1:J1";
-            ValueRange body = new ValueRange().setValues(values);
-            try {
-                accessor.values()
-                    .update(instance.getLogURL(), range, body)
-                    .setValueInputOption("RAW")
-                    .execute();
-            } catch (IOException e) {
-                System.err.println("Connection failed; attempting to re-establish...");
-                // TODO re-establish connection and queue the data push
-            }
-        }
+        };
+        Main.getActionThread().addAction(bulk);
     }
     
 }

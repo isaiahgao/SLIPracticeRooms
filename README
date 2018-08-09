@@ -1,0 +1,32 @@
+Practice room program.
+Written by Isaiah Gao for JHU Student Leadership and Involvement.
+This is a manual for any future devs that may pick up this project.
+Note that I will refer to the google sheet storage thingy as a "database." I am aware that google sheets isn't a database,
+but for all intents and purposes in this project, it functions as one and I can think of no other convenient term.
+
+To run:
+Double click the JAR file. A GUI should pop up.
+
+To use:
+Select a room by clicking a button (it will highlight GREEN), then scan JCARD to check out the room.
+Scanning a JCARD while the JCARD is marked as checked-out will return the key.
+
+Startup:
+User data loads immediately from the database sheet to be held in memory.
+User data registration pushes immediately to google sheet database.
+Practice room data initially scans the practice room sheet, creates a new sheet for a month if needed, and determines the next empty line number.
+	The actual text data is not held in memory.
+Practice room data pushes immediately to sheet when inputted.
+
+Input:
+20-digit JCARD number input obtained via keyboard listener. Listener is only active while a valid button is selected.
+Input is preceeded by a semicolon (;) and is terminated by a question mark (?). Failing to type sequential letters of the input
+within 10 ms of each other will cancel the queue. This is to prevent manual input of card numbers.
+
+Error cases:
+	Connection failed when uploading data:
+		Add to a queue within QueueIO, start timer that pings every 30 seconds to try to upload data. When successful, the timer
+		stops. If the program is closed while data is in the queue, it is serialized and upload is reattempted when the program
+		is open again.
+	Restarting program while rooms are still checked out:
+		Inital scan of practice room data will find rooms that are still checked out, and will mark them as such.
