@@ -6,7 +6,6 @@ import sli.isaiahgao.Main;
 import sli.isaiahgao.data.FullName;
 import sli.isaiahgao.data.UserData;
 
-@Deprecated
 public class GUIAddInfoUseOnce extends GUIAddInfo {
 
     private static final long serialVersionUID = -8885159911533375810L;

@@ -1,6 +1,8 @@
 package sli.isaiahgao.data;
 
 public class InputCollector {
+    
+    private static final int ID_LENGTH = 19;
 
     public InputCollector() {
         this.empty();
@@ -9,6 +11,7 @@ public class InputCollector {
     private boolean collecting;
     private boolean enabled;
     private StringBuilder buf;
+    private long lastCollected = -1;
 
     public boolean isEnabled() {
         return this.enabled;
@@ -26,29 +29,54 @@ public class InputCollector {
         this.collecting = b;
         if (b) {
             this.empty();
+        } else {
+            this.lastCollected = -1;
         }
     }
+    
+    private boolean checkTimestamp() {
+        if (this.lastCollected > -1 && System.currentTimeMillis() - this.lastCollected > 40) {
+            System.out.println("too slow! reset buffer");
+            this.empty();
+            return false;
+        }
+        
+        this.lastCollected = System.currentTimeMillis();
+        return true;
+    }
 
-    public void add(String s) {
-        if (!enabled || !collecting)
-            return;
+    /**
+     * @return whether or not the collector can hold more input.
+     */
+    public boolean add(String s) {
+        if (!enabled)
+            return true;
+        
+        if (!collecting)
+            this.setCollecting(true);
+        
+        if (!this.checkTimestamp())
+            return true;
+        
         buf.append(s);
+        
+        if (buf.length() == ID_LENGTH) {
+            return false;
+        }
+        return true;
     }
 
-    public void add(char c) {
-        if (!enabled || !collecting)
-            return;
-        buf.append(c);
+    public boolean add(char c) {
+        return this.add("" + c);
     }
 
-    public void add(int i) {
-        if (!enabled || !collecting)
-            return;
-        buf.append(i);
+    public boolean add(int i) {
+        return this.add("" + i);
     }
 
     public void empty() {
         this.buf = new StringBuilder(30);
+        this.lastCollected = -1;
     }
 
     @Override

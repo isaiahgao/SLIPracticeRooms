@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import com.google.common.collect.Lists;
 
 import sli.isaiahgao.Main;
+import sli.isaiahgao.SoundHandler.Sound;
 import sli.isaiahgao.Utils;
 import sli.isaiahgao.io.Action;
 import sli.isaiahgao.io.QueueIO.IODestination;
@@ -69,13 +71,13 @@ public class HandlerRoomData {
         if (inst != null) {
             this.logout(inst);
             instance.getBaseGUI().getButtonByID(inst.getRoom()).setEnabled(true);
-            // TODO play sign-out sound
+            Sound.SIGN_OUT.play();
             return ActionResult.LOG_OUT;
         }
         
         this.login(usd, room);
         instance.getBaseGUI().getButtonByID(room).setEnabled(false);
-        // TODO play sign-in sound
+        Sound.SIGN_IN.play();
         return ActionResult.LOG_IN;
     }
     
@@ -85,6 +87,57 @@ public class HandlerRoomData {
     
     public synchronized boolean usingRoom(String id) {
         return this.currentUsers.containsKey(id);
+    }
+
+    // sync program to spreadsheet
+    public synchronized void synchronize() {
+        try {
+            ValueRange vr = SheetsIO.getService().spreadsheets().values().get(Main.getLogURL(), "A:I").execute();
+            List<List<Object>>  values = vr.getValues();
+            if (values == null) {
+                this.logsize = 0;
+                return;
+            }
+            
+            this.logsize = values.size();
+            
+            values.stream().forEach((list) -> {
+                if (!this.isEmpty(list.get(0))) {
+                    if (this.isEmpty(list.get(8))) {
+                        // still checked out; don't care
+                        return;
+                    }
+                    
+                    // manually marked as returned;
+                    // 1. set button active again
+                    // 2. remove user from room data
+                    String[] arr = ((String) list.get(4)).split(" ");
+                    if (arr.length < 2) {
+                        return;
+                    }
+                    
+                    int room = Integer.parseInt(arr[1]);
+                    
+                    // remove user from map
+                    for (Iterator<UserInstance> it = this.currentUsers.values().iterator(); it.hasNext();) {
+                        UserInstance uis = it.next();
+                        if (uis.getRoom() == room) {
+                            it.remove();
+                            break;
+                        }
+                    }
+                    
+                    // set button active again
+                    this.instance.getBaseGUI().getButtonByID(room).setEnabled(true);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private boolean isEmpty(Object o) {
+        return o == null || o.equals("");
     }
     
     // log in

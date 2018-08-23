@@ -1,5 +1,6 @@
 package sli.isaiahgao.gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
 
@@ -11,7 +12,7 @@ import javax.swing.JTextField;
 import sli.isaiahgao.Main;
 
 public abstract class GUIAddInfo extends GUI implements ActionListener {
-
+    
     private static final long serialVersionUID = 4067939367164395753L;
 
     /**
@@ -59,12 +60,14 @@ public abstract class GUIAddInfo extends GUI implements ActionListener {
         buttonCancel = new JButton("Cancel");
         buttonCancel.addActionListener(this);
         buttonCancel.setActionCommand("cancel");
+        buttonCancel.setBackground(Color.WHITE);
         
         textTitle = new JLabel(line);
         textFirstName = new JLabel("First Name");
         textLastName = new JLabel("Last Name");
         textJHED = new JLabel("JHED (e.g. jsmith41)");
-        textPhoneNumber = new JLabel("Phone Number");
+        textPhoneNumber = new JLabel("Phone Number (no dashes)");
+        
         promptFirstName = new JTextField(5);
         promptLastName = new JTextField(5);
         promptJHED = new JTextField(5);
@@ -73,6 +76,7 @@ public abstract class GUIAddInfo extends GUI implements ActionListener {
         buttonOK = new JButton(confirm);
         buttonOK.addActionListener(this);
         buttonOK.setActionCommand("ok");
+        buttonOK.setBackground(Color.WHITE);
 
         //adjust size and set layout
         setPreferredSize(new Dimension(369, 382));
@@ -92,16 +96,18 @@ public abstract class GUIAddInfo extends GUI implements ActionListener {
         add(buttonOK);
 
         //set component bounds(only needed by Absolute Positioning)
-        buttonCancel.setBounds(230, 325, 125, 45);
-        textTitle.setBounds(120, 20, 140, 40);
+        textTitle.setBounds(75, 20, 370, 100);
         textFirstName.setBounds(30, 180, 100, 25);
         textLastName.setBounds(30, 215, 100, 25);
         textJHED.setBounds(30, 255, 120, 25);
-        textPhoneNumber.setBounds(30, 290, 100, 25);
+        textPhoneNumber.setBounds(30, 290, 175, 25);
+        
         promptFirstName.setBounds(100, 180, 255, 25);
         promptLastName.setBounds(100, 215, 255, 25);
         promptJHED.setBounds(150, 255, 205, 25);
-        promptPhoneNumber.setBounds(120, 290, 235, 25);
+        promptPhoneNumber.setBounds(195, 290, 160, 25);
+        
+        buttonCancel.setBounds(230, 325, 125, 45);
         buttonOK.setBounds(10, 325, 215, 45);
     }
     

@@ -5,10 +5,13 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -32,8 +35,8 @@ public class GUIBase extends GUI implements ActionListener {
     private static final Color YELLOW = new Color(255, 251, 225);
 
     public GUIBase(Main instance) {
-        super(instance, "JHUnions Practice Rooms", 2000, 1200, JFrame.EXIT_ON_CLOSE, true);
-        this.frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        super(instance, "JHUnions Practice Rooms BETA", 1280, 1024, JFrame.EXIT_ON_CLOSE, true);
+        //this.frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
     private InputCollector in;
@@ -48,7 +51,9 @@ public class GUIBase extends GUI implements ActionListener {
     private JLabel textStepOneInfo;
     private JLabel textStepTwo;
     private JLabel textStepTwoInfo;
+    private JButton refreshButton;
     
+    private long lastSync;
     private String curId;
     
     public synchronized String getCurrentId() {
@@ -74,6 +79,7 @@ public class GUIBase extends GUI implements ActionListener {
             curbutt.validate();
         }
         this.buttonPressed = butt == null ? 0 : Integer.parseInt(butt.getName());
+        this.toggleTextVisibility(this.buttonPressed == 0);
     }
     
     public void setButtonEnabled(int button, boolean enabled) {
@@ -83,13 +89,14 @@ public class GUIBase extends GUI implements ActionListener {
     public void scanID(String id) {
         System.out.println(id);
         this.curId = id;
+        /*
         // cut off first and last digit, which are ; and ?
         if (id.charAt(0) == ';') {
             id = id.substring(1);
         }
         if (id.charAt(id.length() - 1) == '?') {
             id = id.substring(0, id.length() - 1);
-        }
+        }*/
         
         if (Main.getRoomHandler().usingRoom(id)) {
             // sign out if using a room
@@ -100,7 +107,7 @@ public class GUIBase extends GUI implements ActionListener {
         
         JButton pressed = this.getPressedButton();
         if (pressed == null) {
-            this.instance.sendMessage("Please choose an option on the left, <i>then</i> swipe your JCard!");
+            this.instance.sendMessage("Please choose a practice room, <i>then</i> swipe your JCard!");
             return;
         }
         
@@ -178,6 +185,18 @@ public class GUIBase extends GUI implements ActionListener {
         int buttonWidth = w / 2 - 100;
         int buttonHeight = buttonHeightOffset - 10;
         
+        // add the refresh button
+        try {
+            this.refreshButton = new JButton(new ImageIcon(ImageIO.read(this.getClass().getResourceAsStream("/refresh.png"))));
+            this.refreshButton.setBounds(10, 10, 50, 50);
+            this.refreshButton.setBackground(Color.WHITE);
+            this.refreshButton.setActionCommand("refresh");
+            this.refreshButton.addActionListener(this);
+            this.add(this.refreshButton);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
         //x, y, width, height
         this.addPracticeRoomButton(-2, Utils.format("Update My Info", 16, "Teen"), 60, bsy - buttonHeight / 2, buttonWidth * 2 + 10, buttonHeight / 2 - 5);
         
@@ -193,12 +212,12 @@ public class GUIBase extends GUI implements ActionListener {
         this.addPracticeRoomButton(119, buttonWidth + 70, bsy + 4 * buttonHeightOffset, buttonWidth, buttonHeight);
 
         this.textStepOne = new JLabel(Utils.format("Step ONE:", 28, "arial black"));
-        this.textStepOneInfo = new JLabel(Utils.format("Select Room!", 48, "verdana"));
+        this.textStepOneInfo = new JLabel(Utils.format("Select Room!", 72, "verdana"));
         this.textStepTwo = new JLabel(Utils.format("Step TWO:", 28, "arial black"));
-        this.textStepTwoInfo = new JLabel(Utils.format("Swipe J-Card!", 48, "verdana"));
+        this.textStepTwoInfo = new JLabel(Utils.format("Swipe J-Card!", 72, "verdana"));
 
         // adjust size and set layout
-        this.setPreferredSize(new Dimension(1000, 600));
+        this.setPreferredSize(new Dimension(1280, 1024));
         this.setLayout(null);
 
         // add components
@@ -208,15 +227,16 @@ public class GUIBase extends GUI implements ActionListener {
         this.add(textStepOneInfo);
         this.add(textStepTwo);
         this.add(textStepTwoInfo);
+        this.toggleTextVisibility(true);
 
         // set component bounds(only needed by Absolute Positioning)
         //this.register.setBounds(525, 210, 180, 85);
         //this.useOnce.setBounds(725, 210, 180, 85);
-        this.textStepOne.setBounds(w / 6, 50, 500, 100);
-        this.textStepOneInfo.setBounds(w / 6 - 50, 70, 500, 200);
+        this.textStepOne.setBounds(w * 3 / 8, 20, 500, 100);
+        this.textStepOneInfo.setBounds(w / 4, 40, 1000, 200);
         
-        this.textStepTwo.setBounds(w * 5 / 8, 50, 500, 100);
-        this.textStepTwoInfo.setBounds(w * 5 / 8 - 50, 70, 500, 200);
+        this.textStepTwo.setBounds(w * 3 / 8, 20, 500, 100);
+        this.textStepTwoInfo.setBounds(w / 4, 40, 1000, 200);
 
         // KeyListener kl = new JCardScanListener(this);
         // this.addKeyListener(kl);
@@ -226,9 +246,37 @@ public class GUIBase extends GUI implements ActionListener {
         this.setVisible(true);
         this.setFocusable(true);
     }
+    
+    private void toggleTextVisibility(boolean stepOne) {
+        this.textStepOne.setVisible(stepOne);
+        this.textStepOneInfo.setVisible(stepOne);
+        this.textStepTwo.setVisible(!stepOne);
+        this.textStepTwoInfo.setVisible(!stepOne);
+    }
 
     private void setupKeyListener(JComponent c) {
-        c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(';'), "start");
+        for (int i = 0; i < 10; i++) {
+            c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(i + ""), i);
+            c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                    .put(KeyStroke.getKeyStroke((int) Utils.getField(KeyEvent.class, null, "VK_NUMPAD" + i), 0), i);
+
+            final int j = i;
+            c.getActionMap().put(i, new AbstractAction() {
+                private static final long serialVersionUID = 1148616746542133372L;
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    System.out.println("key pressed " + j);
+                    if (!in.add(j)) {
+                        GUIBase.this.scanID(in.toString());
+                        in.setCollecting(false);
+                    }
+                }
+            });
+        }
+        
+        // new version of tapper doesn't prefix with ; and end with ? anymore
+        /*c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(';'), "start");
         c.getActionMap().put("start", new AbstractAction() {
             private static final long serialVersionUID = 8708730083077254773L;
 
@@ -265,7 +313,7 @@ public class GUIBase extends GUI implements ActionListener {
                     scanID(in.toString());
                 in.setCollecting(false);
             }
-        });
+        });*/
     }
     
     private void addPracticeRoomButton(int id, String title, int x, int y, int width, int height) {
@@ -313,7 +361,10 @@ public class GUIBase extends GUI implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        if (e.getActionCommand().equals("refresh") && System.currentTimeMillis() - this.lastSync > 10000) {
+            this.lastSync = System.currentTimeMillis();
+            Main.getRoomHandler().synchronize();
+        }
     }
 
 }
