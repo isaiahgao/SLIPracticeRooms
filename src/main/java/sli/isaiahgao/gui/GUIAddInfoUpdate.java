@@ -3,6 +3,7 @@ package sli.isaiahgao.gui;
 import java.awt.event.ActionEvent;
 
 import sli.isaiahgao.Main;
+import sli.isaiahgao.Utils;
 import sli.isaiahgao.data.FullName;
 import sli.isaiahgao.data.UserData;
 
@@ -11,13 +12,14 @@ public class GUIAddInfoUpdate extends GUIAddInfo {
     private static final long serialVersionUID = -888515991153375810L;
 
     public GUIAddInfoUpdate(Main instance, String userId, GUIBase base) {
-        super(instance, base, "Update my Information", userId, "Update my Information", "OK");
+        super(instance, base, "Update my Information", userId, Utils.format("Update my Information", 24, "Teen", true), "OK");
         this.postSetup();
     }
     
     @Override
     protected void setup() {
         super.setup();
+        this.textTitle.setBounds(70, 30, 370, 100);
     }
     
     private void postSetup() {

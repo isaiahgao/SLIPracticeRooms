@@ -96,7 +96,7 @@ public abstract class GUIAddInfo extends GUI implements ActionListener {
         add(buttonOK);
 
         //set component bounds(only needed by Absolute Positioning)
-        textTitle.setBounds(75, 20, 370, 100);
+        textTitle.setBounds(0, 20, 370, 100);
         textFirstName.setBounds(30, 180, 100, 25);
         textLastName.setBounds(30, 215, 100, 25);
         textJHED.setBounds(30, 255, 120, 25);

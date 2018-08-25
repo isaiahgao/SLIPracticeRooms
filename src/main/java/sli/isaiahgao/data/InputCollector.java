@@ -12,9 +12,15 @@ public class InputCollector {
     private boolean enabled;
     private StringBuilder buf;
     private long lastCollected = -1;
+    
+    private boolean manual;
 
     public boolean isEnabled() {
         return this.enabled;
+    }
+    
+    public void toggleManual() {
+        this.manual = !this.manual;
     }
 
     public void setEnabled(boolean b) {
@@ -55,7 +61,7 @@ public class InputCollector {
         if (!collecting)
             this.setCollecting(true);
         
-        if (!this.checkTimestamp())
+        if (!this.manual && !this.checkTimestamp())
             return true;
         
         buf.append(s);

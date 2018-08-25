@@ -1,5 +1,6 @@
 package sli.isaiahgao.data;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Month;
 import java.util.ArrayList;
@@ -7,9 +8,11 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.api.services.sheets.v4.Sheets.Spreadsheets;
 import com.google.api.services.sheets.v4.model.AddSheetRequest;
@@ -99,11 +102,20 @@ public class HandlerRoomData {
                 return;
             }
             
-            this.logsize = values.size();
-            
+            // calculate log size
+            this.logsize = 0;
             values.stream().forEach((list) -> {
-                if (!this.isEmpty(list.get(0))) {
-                    if (this.isEmpty(list.get(8))) {
+                if (!list.isEmpty() && !this.isEmpty(list.get(0))) {
+                    ++this.logsize;
+                }
+            });
+            
+            Set<Integer> processed = new HashSet<>();
+            // reverse iterate
+            for (int j = values.size() - 1; j > 0; j--) {
+                List<Object> list = values.get(j);
+                if (!list.isEmpty() && !this.isEmpty(list.get(0))) {
+                    if (list.size() < 9 || this.isEmpty(list.get(8))) {
                         // still checked out; don't care
                         return;
                     }
@@ -118,20 +130,35 @@ public class HandlerRoomData {
                     
                     int room = Integer.parseInt(arr[1]);
                     
+                    if (!processed.add(room)) {
+                        // already processed this room number
+                        return;
+                    }
+                    
                     // remove user from map
                     for (Iterator<UserInstance> it = this.currentUsers.values().iterator(); it.hasNext();) {
                         UserInstance uis = it.next();
                         if (uis.getRoom() == room) {
                             it.remove();
+                            
+                            // set button active again
+                            this.instance.getBaseGUI().getButtonByID(room).setEnabled(true);
                             break;
                         }
                     }
-                    
-                    // set button active again
-                    this.instance.getBaseGUI().getButtonByID(room).setEnabled(true);
                 }
-            });
+            }
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void loadUser(String str) {
+        try {
+            UserInstance inst = new UserInstance(str);
+            this.currentUsers.put(inst.getUser().getHopkinsID(), inst);
+            this.instance.getBaseGUI().getButtonByID(inst.getRoom()).setEnabled(false);
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
@@ -169,6 +196,7 @@ public class HandlerRoomData {
         };
         
         Main.getActionThread().addAction(action);
+        this.writeCurrentUsers();
     }
     
     // handle IO for logging in
@@ -207,6 +235,7 @@ public class HandlerRoomData {
         };
         
         Main.getActionThread().addAction(action);
+        this.writeCurrentUsers();
     }
     
     // check if a new month is needed
@@ -274,6 +303,23 @@ public class HandlerRoomData {
             }
         };
         Main.getActionThread().addAction(bulk);
+        this.writeCurrentUsers();
+    }
+    
+    public synchronized void writeCurrentUsers() {
+        try {
+            FileWriter writer = new FileWriter("config.jhunions");
+            this.currentUsers.entrySet().stream().forEach((entry) -> {
+                try {
+                    writer.write(entry.getValue().toString() + System.lineSeparator());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
 }

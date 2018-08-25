@@ -51,6 +51,7 @@ public class GUIBase extends GUI implements ActionListener {
     private JLabel textStepOneInfo;
     private JLabel textStepTwo;
     private JLabel textStepTwoInfo;
+    private JLabel isManual;
     private JButton refreshButton;
     
     private long lastSync;
@@ -215,6 +216,7 @@ public class GUIBase extends GUI implements ActionListener {
         this.textStepOneInfo = new JLabel(Utils.format("Select Room!", 72, "verdana"));
         this.textStepTwo = new JLabel(Utils.format("Step TWO:", 28, "arial black"));
         this.textStepTwoInfo = new JLabel(Utils.format("Swipe J-Card!", 72, "verdana"));
+        this.isManual = new JLabel("MANUAL ID ENTRY");
 
         // adjust size and set layout
         this.setPreferredSize(new Dimension(1280, 1024));
@@ -227,6 +229,7 @@ public class GUIBase extends GUI implements ActionListener {
         this.add(textStepOneInfo);
         this.add(textStepTwo);
         this.add(textStepTwoInfo);
+        this.add(this.isManual);
         this.toggleTextVisibility(true);
 
         // set component bounds(only needed by Absolute Positioning)
@@ -237,6 +240,9 @@ public class GUIBase extends GUI implements ActionListener {
         
         this.textStepTwo.setBounds(w * 3 / 8, 20, 500, 100);
         this.textStepTwoInfo.setBounds(w / 4, 40, 1000, 200);
+        
+        this.isManual.setBounds(w - 150, 0, 150, 20);
+        this.isManual.setVisible(false);
 
         // KeyListener kl = new JCardScanListener(this);
         // this.addKeyListener(kl);
@@ -274,6 +280,20 @@ public class GUIBase extends GUI implements ActionListener {
                 }
             });
         }
+        
+        c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(11 + ""), 11);
+        c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_QUOTE, 0), 11);
+        c.getActionMap().put(11, new AbstractAction() {
+            private static final long serialVersionUID = 783045519366944315L;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                in.toggleManual();
+                isManual.setVisible(!isManual.isVisible());
+            }
+        });
+        
         
         // new version of tapper doesn't prefix with ; and end with ? anymore
         /*c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(';'), "start");

@@ -1,5 +1,6 @@
 package sli.isaiahgao;
 
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 
 import javax.sound.sampled.AudioInputStream;
@@ -14,9 +15,8 @@ public class SoundHandler {
         ERROR();
         
         private Sound() {
-            InputStream is = this.getClass().getResourceAsStream("/sounds/" + this.toString() + ".wav");
-            
             try {
+                InputStream is = new BufferedInputStream(this.getClass().getResourceAsStream("/sounds/" + this.toString() + ".wav"));
                 this.clip = AudioSystem.getClip();
                 this.ais = AudioSystem.getAudioInputStream(is);
             } catch (Exception e) {
@@ -28,12 +28,12 @@ public class SoundHandler {
         private Clip clip;
         
         public void play() {
-            try {
+            /*try {
                 this.clip.open(ais);
                 this.clip.start();
             } catch (Exception e) {
                 e.printStackTrace();
-            }
+            }*/
         }
     }
 

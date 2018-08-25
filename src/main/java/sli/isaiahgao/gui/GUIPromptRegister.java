@@ -80,6 +80,8 @@ public class GUIPromptRegister extends GUI implements ActionListener {
             new GUIAddInfoRegister(this.instance, this.base.getCurrentId(), this.base);
         } else if (s.equals("useonce")) {
             this.frame.dispose();
+            // open use once prompt
+            new GUIAddInfoUseOnce(this.instance, this.base.getCurrentId(), this.base);
         }
     }
 

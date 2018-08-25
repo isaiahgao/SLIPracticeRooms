@@ -1,9 +1,17 @@
 package sli.isaiahgao;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Timer;
+
 import javax.swing.JFrame;
 
 import sli.isaiahgao.data.HandlerRoomData;
 import sli.isaiahgao.data.HandlerUserData;
+import sli.isaiahgao.gui.GUI;
 import sli.isaiahgao.gui.GUIBase;
 import sli.isaiahgao.gui.GUIConfirm;
 import sli.isaiahgao.gui.GUIMessage;
@@ -23,6 +31,8 @@ public final class Main {
     
     private static final String REAL_DB_ID = "1bESGU8NWtu4feYrR7bYHhIib2y_a5iNOJfwiDhcF6vI";
     private static final String REAL_LOG_ID = "1MdkPLOyFvOqKnkpwT7ML-vzmog7dBqBLK7i8wH-u-Mg";
+    
+    public static final Timer TIMER = new Timer();
 
     public static void main(String[] args) {
         try {
@@ -41,6 +51,28 @@ public final class Main {
         instance.base = new GUIBase(instance);
         
         handlerRoom.synchronize();
+        loadCurrentRooms();
+    }
+    
+    private static void loadCurrentRooms() {
+        try {
+            File file = new File("config.jhunions");
+            if (!file.exists())
+                return;
+            
+            Scanner sc = new Scanner(file);
+            List<String> data = new LinkedList<>();
+            while (sc.hasNextLine()) {
+                data.add(sc.nextLine());
+            }
+            sc.close();
+            
+            data.stream().forEach((s) -> {
+                handlerRoom.loadUser(s);
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public static ActionThread getActionThread() {
@@ -65,20 +97,20 @@ public final class Main {
     
     private GUIBase base;
     
-    public void sendMessage(String s) {
-        this.sendMessage(s, null);
+    public GUI sendMessage(String s) {
+        return this.sendMessage(s, null);
     }
     
-    public void sendMessage(String s, JFrame todispose) {
-        this.sendMessage(s, todispose, null);
+    public GUI sendMessage(String s, JFrame todispose) {
+        return this.sendMessage(s, todispose, null);
     }
     
-    public void sendMessage(String s, JFrame todispose, Runnable runafter) {
-        new GUIMessage(this, Utils.format(s, 12, "verdana", true), todispose, runafter);
+    public GUI sendMessage(String s, JFrame todispose, Runnable runafter) {
+        return new GUIMessage(this, Utils.format(s, 12, "verdana", true), todispose, runafter);
     }
     
-    public void sendConfirm(String s, JFrame todispose, Runnable runafter) {
-        new GUIConfirm(this, Utils.format(s, 12, "verdana", true), todispose, runafter);
+    public GUI sendConfirm(String s, JFrame todispose, Runnable runafter) {
+        return new GUIConfirm(this, Utils.format(s, 12, "verdana", true), todispose, runafter);
     }
     
     public GUIBase getBaseGUI() {

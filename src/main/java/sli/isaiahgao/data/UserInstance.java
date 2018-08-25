@@ -19,6 +19,18 @@ public class UserInstance {
         this.room = room;
         this.timeIn = new Date();
     }
+    
+    public UserInstance(String data) throws IllegalArgumentException {
+        try {
+            String[] arr = data.split("\t");
+            this.who = new UserData(arr[0], new FullName(arr[1], arr[2]), arr[3], Long.parseLong(arr[4]));
+            this.room = Integer.parseInt(arr[5]);
+            this.timeIn = new Date(Long.parseLong(arr[6]));
+            this.line = Integer.parseInt(arr[7]);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
 
     private UserData who;
     private int room;
@@ -47,6 +59,11 @@ public class UserInstance {
     
     public String getSheetName() {
         return Utils.capitalizeFirst(Month.of(this.timeIn.getMonth() + 1).toString()) + " " + Calendar.getInstance().get(Calendar.YEAR);
+    }
+    
+    @Override
+    public String toString() {
+        return this.who.toString() + "\t" + this.room + "\t" + this.timeIn.getTime() + "\t" + this.getLine();
     }
     
     public List<Object> toObjectList() {

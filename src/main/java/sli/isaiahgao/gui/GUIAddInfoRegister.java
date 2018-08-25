@@ -17,11 +17,17 @@ public class GUIAddInfoRegister extends GUIAddInfo {
     private static final long serialVersionUID = -8885159911533375810L;
 
     public GUIAddInfoRegister(Main main) {
-        super(main, main.getBaseGUI(), "Register", "123", Utils.format("Register with<br>JHUnions", 24, "Teen", true), "confirm");
+        super(main, main.getBaseGUI(), "Register", "123", Utils.format("Register with<br>JHUnions", 24, "Teen", true), "Confirm");
     }
     
     public GUIAddInfoRegister(Main instance, String userId, GUIBase base) {
-        super(instance, base, "Register", userId, "Register with JHUnions", "Register");
+        super(instance, base, "Register", userId, Utils.format("Register with<br>JHUnions", 24, "Teen", true), "Register");
+    }
+    
+    @Override
+    protected void setup() {
+        super.setup();
+        this.textTitle.setBounds(70, 30, 370, 100);
     }
 
     @Override

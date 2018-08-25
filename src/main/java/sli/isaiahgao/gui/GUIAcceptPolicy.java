@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -48,6 +49,8 @@ public class GUIAcceptPolicy extends GUI implements ActionListener, WindowListen
     protected JLabel image;
     protected JButton accept, decline;
 
+    private boolean accepted;
+    
     @Override
     protected void setup() {
         try {
@@ -86,7 +89,17 @@ public class GUIAcceptPolicy extends GUI implements ActionListener, WindowListen
         } else if (e.getActionCommand().equals("ok")) {
             try {
                 Main.getUserHandler().push(usd);
-                this.instance.sendMessage("You have successfully updated your information!", this.frame);
+                this.instance.getBaseGUI().confirmAction(usd);
+                this.accepted = true;
+                this.frame.dispose();
+                final GUI popup = this.instance.sendMessage("You have checked out Practice Room " + this.instance.getBaseGUI().getPressedButtonID() + "!");
+                
+                Main.TIMER.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        popup.frame.dispose();
+                    }
+                }, 3000L);
             } catch (Exception ex) {
                 this.instance.sendMessage("Invalid info. Please try again.");
             }
@@ -105,7 +118,8 @@ public class GUIAcceptPolicy extends GUI implements ActionListener, WindowListen
 
     @Override
     public void windowClosed(WindowEvent e) {
-        this.instance.sendMessage("You cannot use the practice rooms unless you agree to our policies.");
+        if (!accepted)
+            this.instance.sendMessage("You cannot use the practice rooms unless you agree to our policies.");
     }
 
     @Override
