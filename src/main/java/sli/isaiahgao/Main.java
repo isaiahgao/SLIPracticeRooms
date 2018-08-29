@@ -28,10 +28,10 @@ public final class Main {
     private static QueueIO ioQueue;
     private static Main instance;
     private static final String TEST_DB_ID = "1bESGU8NWtu4feYrR7bYHhIib2y_a5iNOJfwiDhcF6vI";
-    private static final String REAL_LOG_ID = "1a_0sD8cijhYPAaci_tPuohCgQpfVnvpFD-SPqagUsgI";//"1MdkPLOyFvOqKnkpwT7ML-vzmog7dBqBLK7i8wH-u-Mg";
+    private static final String TEST_LOG_ID = "1a_0sD8cijhYPAaci_tPuohCgQpfVnvpFD-SPqagUsgI";//"1MdkPLOyFvOqKnkpwT7ML-vzmog7dBqBLK7i8wH-u-Mg";
     
     private static final String REAL_DB_ID = "1bESGU8NWtu4feYrR7bYHhIib2y_a5iNOJfwiDhcF6vI";
-    //private static final String REAL_LOG_ID = "1MdkPLOyFvOqKnkpwT7ML-vzmog7dBqBLK7i8wH-u-Mg";
+    private static final String REAL_LOG_ID = "1MdkPLOyFvOqKnkpwT7ML-vzmog7dBqBLK7i8wH-u-Mg";
     
     public static final Timer TIMER = new Timer();
 

@@ -159,6 +159,7 @@ public class HandlerRoomData {
                             
                             // set button active again
                             this.instance.getBaseGUI().getButtonByID(room).setEnabled(true);
+                            this.instance.getBaseGUI().setTimeForRoom(room, null);
                         }
                     }
 
@@ -169,6 +170,7 @@ public class HandlerRoomData {
                             
                             // set  button active again
                             this.instance.getBaseGUI().getButtonByID(room).setEnabled(true);
+                            this.instance.getBaseGUI().setTimeForRoom(room, null);
                         }
                     }
                 }
@@ -197,6 +199,7 @@ public class HandlerRoomData {
     private synchronized void login(UserData usd, int room) {
         UserInstance inst = new UserInstance(usd, room);
         currentUsers.put(usd.getHopkinsID(), inst);
+        instance.getBaseGUI().setTimeForRoom(room, inst.getTimeRemaining());
         this.push(inst);
     }
     
