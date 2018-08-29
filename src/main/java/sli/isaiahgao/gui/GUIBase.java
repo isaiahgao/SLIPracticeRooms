@@ -35,7 +35,7 @@ public class GUIBase extends GUI implements ActionListener {
     private static final Color YELLOW = new Color(255, 251, 225);
 
     public GUIBase(Main instance) {
-        super(instance, "JHUnions Practice Rooms BETA", 1280, 1024, JFrame.EXIT_ON_CLOSE, true);
+        super(instance, "JHUnions Practice Rooms BETA v0.2", 1280, 1024, JFrame.EXIT_ON_CLOSE, true);
         //this.frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
 
@@ -56,6 +56,10 @@ public class GUIBase extends GUI implements ActionListener {
     
     private long lastSync;
     private String curId;
+    
+    public JLabel getManualLabel() {
+        return this.isManual;
+    }
     
     public synchronized String getCurrentId() {
         return curId;
@@ -108,7 +112,7 @@ public class GUIBase extends GUI implements ActionListener {
         
         JButton pressed = this.getPressedButton();
         if (pressed == null) {
-            this.instance.sendMessage("Please choose a practice room, <i>then</i> swipe your JCard!");
+            this.instance.sendMessage("Please choose a practice room,<br><i>then</i> swipe your JCard!", 65);
             return;
         }
         
@@ -199,18 +203,18 @@ public class GUIBase extends GUI implements ActionListener {
         }
         
         //x, y, width, height
-        this.addPracticeRoomButton(-2, Utils.format("Update My Info", 16, "Teen"), 60, bsy - buttonHeight / 2, buttonWidth * 2 + 10, buttonHeight / 2 - 5);
+        this.addPracticeRoomButton(-2, Utils.format("Update My Info", 16, "Corbel"), 80, bsy - buttonHeight / 2, buttonWidth * 2 + 10, buttonHeight / 2 - 5);
         
-        this.addPracticeRoomButton(109, 60, bsy, buttonWidth, buttonHeight);
-        this.addPracticeRoomButton(110, 60, bsy + buttonHeightOffset, buttonWidth, buttonHeight);
-        this.addPracticeRoomButton(111, 60, bsy + 2 * buttonHeightOffset, buttonWidth, buttonHeight);
-        this.addPracticeRoomButton(112, 60, bsy + 3 * buttonHeightOffset, buttonWidth, buttonHeight);
-        this.addPracticeRoomButton(114, 60, bsy + 4 * buttonHeightOffset, buttonWidth, buttonHeight);
-        this.addPracticeRoomButton(115, buttonWidth + 70, bsy, buttonWidth, buttonHeight);
-        this.addPracticeRoomButton(116, buttonWidth + 70, bsy + buttonHeightOffset, buttonWidth, buttonHeight);
-        this.addPracticeRoomButton(117, buttonWidth + 70, bsy + 2 * buttonHeightOffset, buttonWidth, buttonHeight);
-        this.addPracticeRoomButton(118, buttonWidth + 70, bsy + 3 * buttonHeightOffset, buttonWidth, buttonHeight);
-        this.addPracticeRoomButton(119, buttonWidth + 70, bsy + 4 * buttonHeightOffset, buttonWidth, buttonHeight);
+        this.addPracticeRoomButton(109, 80, bsy, buttonWidth, buttonHeight);
+        this.addPracticeRoomButton(110, 80, bsy + buttonHeightOffset, buttonWidth, buttonHeight);
+        this.addPracticeRoomButton(111, 80, bsy + 2 * buttonHeightOffset, buttonWidth, buttonHeight);
+        this.addPracticeRoomButton(112, 80, bsy + 3 * buttonHeightOffset, buttonWidth, buttonHeight);
+        this.addPracticeRoomButton(114, 80, bsy + 4 * buttonHeightOffset, buttonWidth, buttonHeight);
+        this.addPracticeRoomButton(115, buttonWidth + 90, bsy, buttonWidth, buttonHeight);
+        this.addPracticeRoomButton(116, buttonWidth + 90, bsy + buttonHeightOffset, buttonWidth, buttonHeight);
+        this.addPracticeRoomButton(117, buttonWidth + 90, bsy + 2 * buttonHeightOffset, buttonWidth, buttonHeight);
+        this.addPracticeRoomButton(118, buttonWidth + 90, bsy + 3 * buttonHeightOffset, buttonWidth, buttonHeight);
+        this.addPracticeRoomButton(119, buttonWidth + 90, bsy + 4 * buttonHeightOffset, buttonWidth, buttonHeight);
 
         this.textStepOne = new JLabel(Utils.format("Step ONE:", 28, "arial black"));
         this.textStepOneInfo = new JLabel(Utils.format("Select Room!", 72, "verdana"));
@@ -236,17 +240,17 @@ public class GUIBase extends GUI implements ActionListener {
         //this.register.setBounds(525, 210, 180, 85);
         //this.useOnce.setBounds(725, 210, 180, 85);
         this.textStepOne.setBounds(w * 3 / 8, 20, 500, 100);
-        this.textStepOneInfo.setBounds(w / 4, 40, 1000, 200);
+        this.textStepOneInfo.setBounds(w / 4 - 20, 30, 1000, 200);
         
         this.textStepTwo.setBounds(w * 3 / 8, 20, 500, 100);
-        this.textStepTwoInfo.setBounds(w / 4, 40, 1000, 200);
+        this.textStepTwoInfo.setBounds(w / 4 - 40, 30, 1000, 200);
         
         this.isManual.setBounds(w - 150, 0, 150, 20);
         this.isManual.setVisible(false);
 
         // KeyListener kl = new JCardScanListener(this);
         // this.addKeyListener(kl);
-        this.in = new InputCollector();
+        this.in = new InputCollector(this);
         this.in.setEnabled(true);
         this.setupKeyListener(this);
         this.setVisible(true);
@@ -272,7 +276,7 @@ public class GUIBase extends GUI implements ActionListener {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    System.out.println("key pressed " + j);
+                    //System.out.println("key pressed " + j);
                     if (!in.add(j)) {
                         GUIBase.this.scanID(in.toString());
                         in.setCollecting(false);
@@ -290,7 +294,6 @@ public class GUIBase extends GUI implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 in.toggleManual();
-                isManual.setVisible(!isManual.isVisible());
             }
         });
         
@@ -358,7 +361,7 @@ public class GUIBase extends GUI implements ActionListener {
             this.buttons = new HashMap<>();
         }
 
-        JButton butt = new JButton(getTitle(roomNo));
+        JButton butt = new JButton(getTitle(roomNo, null));
         butt.setActionCommand("select_" + roomNo);
         butt.addActionListener(new PRButtonListener(this, butt));
         butt.setBounds(x, y, width, height);
@@ -370,13 +373,22 @@ public class GUIBase extends GUI implements ActionListener {
         butt.setVisible(true);
     }
 
-    private String getTitle(int roomNo) {
+    private String getTitle(int roomNo, String time) {
         String s = "" + roomNo;
         if (roomNo > 111)
             s += "\\nPIANO";
         else if (roomNo == 109)
             s += "\\nDRUM";
-        return Utils.format(s, 20, "Teen", true);
+        
+        if (time != null) {
+            s += "\\n" + time;
+        }
+        return Utils.format(s, 20, "Corbel", true);
+    }
+    
+    public void setTimeForRoom(int room, String time) {
+        JButton butt = this.getButtonByID(room);
+        butt.setText(this.getTitle(room, time));
     }
 
     @Override

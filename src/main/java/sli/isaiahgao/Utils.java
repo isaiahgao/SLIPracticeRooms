@@ -40,7 +40,7 @@ public class Utils {
         int hours = d.getHours();
         int mins = d.getMinutes();
         int secs = d.getSeconds();
-        if (hours > 12) {
+        if (hours > 11) {
             suffix = " PM";
             hours -= 12;
         } else if (hours == 0) {
@@ -48,6 +48,22 @@ public class Utils {
         }
         
         return hours + ":" + DF.format(mins) + ":" + DF.format(secs) + suffix;
+    }
+    
+    public static boolean isValidPhone(long arg) {
+        String strl = "" + arg;
+        // make sure length i sproper
+        if (strl.length() != 10) {
+            return false;
+        }
+        
+        // must not be a string of 1 character
+        for (int i = 1; i < 10; i++) {
+            if (strl.charAt(i) != strl.charAt(i - 1)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -38,6 +38,10 @@ public abstract class GUI extends JPanel {
     protected Main instance;
 
     protected abstract void setup();
+    
+    public JFrame getFrame() {
+        return this.frame;
+    }
 
     public void displayGUI() {
         this.isDisplayed = true;

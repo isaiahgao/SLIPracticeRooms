@@ -12,10 +12,15 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import sli.isaiahgao.Main;
+import sli.isaiahgao.Utils;
 
 public class GUIMessage extends GUI implements ActionListener, WindowListener {
 
     private static final long serialVersionUID = 4064395753L;
+    
+    public static void main(String[] args) {
+        new GUIMessage(new Main(), Utils.format("You cannot use the practice rooms<br>unless you agree to our policies.", 12, "verdana", true), null, null, 50);
+    }
 
     public GUIMessage(Main instance, String info, JFrame todispose, Runnable runafter) {
         super(instance, "Info", 400, 225, JFrame.DISPOSE_ON_CLOSE, true);
@@ -27,6 +32,14 @@ public class GUIMessage extends GUI implements ActionListener, WindowListener {
         this.runafter = runafter;
         this.text.setText(this.info);
     }
+    
+    public GUIMessage(Main instance, String info, JFrame todispose, Runnable runafter, int xbound) {
+        this(instance, info, todispose, runafter);
+        this.xbound = xbound;
+        this.text.setBounds(xbound, 25, 400 - xbound, 100);
+    }
+    
+    private int xbound = 105;
     
     private String info;
     private JButton button;
@@ -53,7 +66,7 @@ public class GUIMessage extends GUI implements ActionListener, WindowListener {
         
         //set component bounds(only needed by Absolute Positioning)
         button.setBounds(110, 165, 185, 50);
-        text.setBounds(50, 25, 300, 100);
+        text.setBounds(xbound, 25, 400 - xbound, 100);
         this.frame.setLocation(500, 500);
         this.frame.setResizable(false);
     }

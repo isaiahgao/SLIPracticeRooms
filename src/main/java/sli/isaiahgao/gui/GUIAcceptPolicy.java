@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
-import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -34,8 +33,9 @@ public class GUIAcceptPolicy extends GUI implements ActionListener, WindowListen
         }
     }
 
-    public GUIAcceptPolicy(Main instance, GUIAddInfo parent, UserData user) {
+    public GUIAcceptPolicy(Main instance, GUIAddInfo parent, UserData user, boolean saveToDB) {
         super(instance, "Practice Room Policy", 713, 1000, JFrame.DISPOSE_ON_CLOSE, true);
+        this.saveToDB = saveToDB;
         this.usd = user;
         this.parent = parent;
         this.parent.frame.dispose();
@@ -48,6 +48,7 @@ public class GUIAcceptPolicy extends GUI implements ActionListener, WindowListen
     protected GUIAddInfo parent;
     protected JLabel image;
     protected JButton accept, decline;
+    protected boolean saveToDB;
 
     private boolean accepted;
     
@@ -84,22 +85,20 @@ public class GUIAcceptPolicy extends GUI implements ActionListener, WindowListen
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getActionCommand().equals("no")) {
-            Sound.ERROR.play();
+            Sound.REGISTER_UNSUCCESSFUL.play();
             this.frame.dispose();
         } else if (e.getActionCommand().equals("ok")) {
             try {
-                Main.getUserHandler().push(usd);
+                String msg = "Checked out<br>Practice Room " + this.instance.getBaseGUI().getPressedButtonID() + "!";
+                
+                if (this.saveToDB) {
+                    Main.getUserHandler().push(usd);
+                    Sound.REGISTER_SUCCESSFUL.play();
+                }
                 this.instance.getBaseGUI().confirmAction(usd);
                 this.accepted = true;
                 this.frame.dispose();
-                final GUI popup = this.instance.sendMessage("You have checked out Practice Room " + this.instance.getBaseGUI().getPressedButtonID() + "!");
-                
-                Main.TIMER.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        popup.frame.dispose();
-                    }
-                }, 3000L);
+                this.instance.sendDisappearingConfirm(msg, 115);
             } catch (Exception ex) {
                 this.instance.sendMessage("Invalid info. Please try again.");
             }
@@ -119,7 +118,7 @@ public class GUIAcceptPolicy extends GUI implements ActionListener, WindowListen
     @Override
     public void windowClosed(WindowEvent e) {
         if (!accepted)
-            this.instance.sendMessage("You cannot use the practice rooms unless you agree to our policies.");
+            this.instance.sendMessage("You cannot use the practice rooms<br>unless you agree to our policies.", 50);
     }
 
     @Override

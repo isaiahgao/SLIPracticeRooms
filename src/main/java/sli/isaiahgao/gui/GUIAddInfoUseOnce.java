@@ -35,7 +35,7 @@ public class GUIAddInfoUseOnce extends GUIAddInfo {
                 
                 try {
                     final UserData usd = new UserData(userId, new FullName(promptFirstName.getText(), promptLastName.getText()), promptJHED.getText(), Long.parseLong(promptPhoneNumber.getText()));
-                    new GUIAcceptPolicy(this.instance, this, usd);
+                    new GUIAcceptPolicy(this.instance, this, usd, false);
                     /*this.instance.sendMessage("You have elected to use the practice room once!", this.frame, new Runnable() {
                         @Override
                         public void run() {

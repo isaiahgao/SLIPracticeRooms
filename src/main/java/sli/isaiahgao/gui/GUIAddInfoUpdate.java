@@ -12,7 +12,7 @@ public class GUIAddInfoUpdate extends GUIAddInfo {
     private static final long serialVersionUID = -888515991153375810L;
 
     public GUIAddInfoUpdate(Main instance, String userId, GUIBase base) {
-        super(instance, base, "Update my Information", userId, Utils.format("Update my Information", 24, "Teen", true), "OK");
+        super(instance, base, "Update my Information", userId, Utils.format("Update my Information", 24, "Corbel", true), "OK");
         this.postSetup();
     }
     

@@ -18,6 +18,7 @@ public class UserInstance {
         this.who = who;
         this.room = room;
         this.timeIn = new Date();
+        this.min90 = new Date(this.timeIn.getTime() + (90l * 60l * 1000l));
     }
     
     public UserInstance(String data) throws IllegalArgumentException {
@@ -26,6 +27,7 @@ public class UserInstance {
             this.who = new UserData(arr[0], new FullName(arr[1], arr[2]), arr[3], Long.parseLong(arr[4]));
             this.room = Integer.parseInt(arr[5]);
             this.timeIn = new Date(Long.parseLong(arr[6]));
+            this.min90 = new Date(this.timeIn.getTime() + (90l * 60l * 1000l));
             this.line = Integer.parseInt(arr[7]);
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
@@ -34,7 +36,7 @@ public class UserInstance {
 
     private UserData who;
     private int room;
-    private Date timeIn;
+    private Date timeIn, min90;
     private int line;
     
     public int getLine() {
@@ -55,6 +57,23 @@ public class UserInstance {
     
     public Date getTimeIn() {
         return this.timeIn;
+    }
+    
+    public String getTimeRemaining() {
+        Date date = new Date();
+        long diff = this.min90.getTime() - date.getTime();
+        
+        if (diff < 0) {
+            return "<strong>TIME EXPIRED</strong>";
+        }
+        
+        String s = "<strong>Time remaining:</strong> ";
+        long mins = diff / 60000;
+        if (mins < 1) {
+            return s + "Less than a minute";
+        }
+        
+        return s + mins + " minutes";
     }
     
     public String getSheetName() {

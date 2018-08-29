@@ -10,30 +10,22 @@ import javax.sound.sampled.Clip;
 public class SoundHandler {
     
     public enum Sound {
-        SIGN_IN(),
-        SIGN_OUT(),
-        ERROR();
+        SIGN_IN,
+        SIGN_OUT,
+        ERROR,
+        REGISTER_SUCCESSFUL,
+        REGISTER_UNSUCCESSFUL;
         
-        private Sound() {
+        public void play() {
             try {
                 InputStream is = new BufferedInputStream(this.getClass().getResourceAsStream("/sounds/" + this.toString() + ".wav"));
-                this.clip = AudioSystem.getClip();
-                this.ais = AudioSystem.getAudioInputStream(is);
+                Clip clip = AudioSystem.getClip();
+                AudioInputStream ais = AudioSystem.getAudioInputStream(is);
+                clip.open(ais);
+                clip.start();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-        
-        private AudioInputStream ais;
-        private Clip clip;
-        
-        public void play() {
-            /*try {
-                this.clip.open(ais);
-                this.clip.start();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }*/
         }
     }
 

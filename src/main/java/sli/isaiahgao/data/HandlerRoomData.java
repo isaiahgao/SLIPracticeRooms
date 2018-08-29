@@ -1,5 +1,6 @@
 package sli.isaiahgao.data;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Month;
@@ -13,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimerTask;
 
 import com.google.api.services.sheets.v4.Sheets.Spreadsheets;
 import com.google.api.services.sheets.v4.model.AddSheetRequest;
@@ -50,6 +52,15 @@ public class HandlerRoomData {
     public HandlerRoomData(Main instance) {
         this.instance = instance;
         this.currentUsers = new HashMap<>();
+        
+        Main.TIMER.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                HandlerRoomData.this.currentUsers.forEach((s, u) -> {
+                    HandlerRoomData.this.instance.getBaseGUI().setTimeForRoom(u.getRoom(), u.getTimeRemaining());
+                });
+            }
+        }, 1l, 30000l);
     }
 
     private Main instance;
@@ -74,12 +85,16 @@ public class HandlerRoomData {
         if (inst != null) {
             this.logout(inst);
             instance.getBaseGUI().getButtonByID(inst.getRoom()).setEnabled(true);
+            instance.getBaseGUI().setTimeForRoom(inst.getRoom(), null);
+            instance.sendDisappearingConfirm("Returned<br>Practice Room " + inst.getRoom() + "!", 115);
+            
             Sound.SIGN_OUT.play();
             return ActionResult.LOG_OUT;
         }
         
         this.login(usd, room);
         instance.getBaseGUI().getButtonByID(room).setEnabled(false);
+        instance.sendDisappearingConfirm("Checked out<br>Practice Room " + this.instance.getBaseGUI().getPressedButtonID() + "!", 115);
         Sound.SIGN_IN.play();
         return ActionResult.LOG_IN;
     }
@@ -115,6 +130,17 @@ public class HandlerRoomData {
             for (int j = values.size() - 1; j > 0; j--) {
                 List<Object> list = values.get(j);
                 if (!list.isEmpty() && !this.isEmpty(list.get(0))) {
+                    String[] arr = ((String) list.get(4)).split(" ");
+                    if (arr.length < 2) {
+                        return;
+                    }
+                    
+                    int room = Integer.parseInt(arr[1]);
+                    if (!processed.add(room)) {
+                        // already processed this room number
+                        return;
+                    }
+                    
                     if (list.size() < 9 || this.isEmpty(list.get(8))) {
                         // still checked out; don't care
                         return;
@@ -123,27 +149,26 @@ public class HandlerRoomData {
                     // manually marked as returned;
                     // 1. set button active again
                     // 2. remove user from room data
-                    String[] arr = ((String) list.get(4)).split(" ");
-                    if (arr.length < 2) {
-                        return;
-                    }
-                    
-                    int room = Integer.parseInt(arr[1]);
-                    
-                    if (!processed.add(room)) {
-                        // already processed this room number
-                        return;
-                    }
                     
                     // remove user from map
                     for (Iterator<UserInstance> it = this.currentUsers.values().iterator(); it.hasNext();) {
                         UserInstance uis = it.next();
+                        processed.remove(uis.getRoom());
                         if (uis.getRoom() == room) {
                             it.remove();
                             
                             // set button active again
                             this.instance.getBaseGUI().getButtonByID(room).setEnabled(true);
-                            break;
+                        }
+                    }
+
+                    for (Iterator<UserInstance> it = this.currentUsers.values().iterator(); it.hasNext();) {
+                        UserInstance uis = it.next();
+                        if (processed.contains(uis.getRoom()) ) {
+                            it.remove();
+                            
+                            // set  button active again
+                            this.instance.getBaseGUI().getButtonByID(room).setEnabled(true);
                         }
                     }
                 }
@@ -158,6 +183,7 @@ public class HandlerRoomData {
             UserInstance inst = new UserInstance(str);
             this.currentUsers.put(inst.getUser().getHopkinsID(), inst);
             this.instance.getBaseGUI().getButtonByID(inst.getRoom()).setEnabled(false);
+            this.instance.getBaseGUI().setTimeForRoom(inst.getRoom(), inst.getTimeRemaining());
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
@@ -308,6 +334,14 @@ public class HandlerRoomData {
     
     public synchronized void writeCurrentUsers() {
         try {
+            if (this.currentUsers.isEmpty()) {
+                File file = new File("config.jhunions");
+                if (file.exists()) {
+                    file.delete();
+                }
+                return;
+            }
+            
             FileWriter writer = new FileWriter("config.jhunions");
             this.currentUsers.entrySet().stream().forEach((entry) -> {
                 try {
