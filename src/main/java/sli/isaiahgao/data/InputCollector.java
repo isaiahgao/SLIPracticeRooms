@@ -4,7 +4,7 @@ import sli.isaiahgao.gui.GUIBase;
 
 public class InputCollector {
     
-    private static final int ID_LENGTH = 19;
+    private static final int ID_LENGTH = 15;
 
     public InputCollector(GUIBase base) {
         this.empty();
@@ -69,6 +69,7 @@ public class InputCollector {
         lastKeystroke = System.currentTimeMillis();
         
         if (buf.length() == ID_LENGTH) {
+            buf.append("0");
             return false;
         }
         return true;
@@ -83,6 +84,7 @@ public class InputCollector {
     }
 
     public void empty() {
+        System.out.println("emptied");
         this.buf = new StringBuilder(30);
         this.lastCollected = -1;
     }

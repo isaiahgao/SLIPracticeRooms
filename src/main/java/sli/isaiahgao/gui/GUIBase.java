@@ -276,7 +276,7 @@ public class GUIBase extends GUI implements ActionListener {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    //System.out.println("key pressed " + j);
+                    System.out.println("key pressed " + j);
                     if (!in.add(j)) {
                         GUIBase.this.scanID(in.toString());
                         in.setCollecting(false);
@@ -285,6 +285,7 @@ public class GUIBase extends GUI implements ActionListener {
             });
         }
         
+        // manual
         c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(11 + ""), 11);
         c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
             .put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_QUOTE, 0), 11);
@@ -294,6 +295,19 @@ public class GUIBase extends GUI implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 in.toggleManual();
+            }
+        });
+
+        // console
+        c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(12 + ""), 12);
+        c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), 12);
+        c.getActionMap().put(12, new AbstractAction() {
+            private static final long serialVersionUID = 7830455674444315L;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new GUIConsole(instance);
             }
         });
         

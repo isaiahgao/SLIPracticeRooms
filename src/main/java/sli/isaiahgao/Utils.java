@@ -43,7 +43,9 @@ public class Utils {
         if (hours > 11) {
             suffix = " PM";
             hours -= 12;
-        } else if (hours == 0) {
+        }
+        
+        if (hours == 0) {
             hours = 12;
         }
         

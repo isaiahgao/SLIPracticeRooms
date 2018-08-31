@@ -11,8 +11,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.TimerTask;
 
@@ -52,6 +54,7 @@ public class HandlerRoomData {
     public HandlerRoomData(Main instance) {
         this.instance = instance;
         this.currentUsers = new HashMap<>();
+        this.disabledRooms = new HashSet<>();
         
         Main.TIMER.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -67,6 +70,7 @@ public class HandlerRoomData {
     
     // user string id : userinstance
     private Map<String, UserInstance> currentUsers;
+    private Set<Integer> disabledRooms;
     private volatile int logsize;
     private Month month;
     
@@ -106,6 +110,20 @@ public class HandlerRoomData {
     public synchronized boolean usingRoom(String id) {
         return this.currentUsers.containsKey(id);
     }
+    
+    public void disableRoom(int room) {
+        this.disabledRooms.add(room);
+    }
+    
+    public synchronized void removeRoom(int room) {
+        this.disabledRooms.remove(room);
+        for (Iterator<UserInstance> it = currentUsers.values().iterator(); it.hasNext();) {
+            if (it.next().getRoom() == room) {
+                it.remove();
+                break;
+            }
+        }
+    }
 
     // sync program to spreadsheet
     public synchronized void synchronize() {
@@ -132,18 +150,18 @@ public class HandlerRoomData {
                 if (!list.isEmpty() && !this.isEmpty(list.get(0))) {
                     String[] arr = ((String) list.get(4)).split(" ");
                     if (arr.length < 2) {
-                        return;
+                        continue;
                     }
                     
                     int room = Integer.parseInt(arr[1]);
                     if (!processed.add(room)) {
                         // already processed this room number
-                        return;
+                        continue;
                     }
                     
                     if (list.size() < 9 || this.isEmpty(list.get(8))) {
                         // still checked out; don't care
-                        return;
+                        continue;
                     }
                     
                     // manually marked as returned;
@@ -335,9 +353,39 @@ public class HandlerRoomData {
         this.writeCurrentUsers();
     }
     
+    public void loadCurrentRooms() {
+        try {
+            File file = new File("config.jhunions");
+            if (!file.exists())
+                return;
+            
+            Scanner sc = new Scanner(file);
+            List<String> data = new LinkedList<>();
+            while (sc.hasNextLine()) {
+                data.add(sc.nextLine());
+            }
+            sc.close();
+            
+            boolean disabled = false;
+            for (String s : data) {
+                if (disabled) {
+                    this.disabledRooms.add(Integer.parseInt(s));
+                } else {
+                    if (s.equals("DISABLED ROOMS")) {
+                        disabled = true;
+                        continue;
+                    }
+                    loadUser(s);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
     public synchronized void writeCurrentUsers() {
         try {
-            if (this.currentUsers.isEmpty()) {
+            if (this.currentUsers.isEmpty() && this.disabledRooms.isEmpty()) {
                 File file = new File("config.jhunions");
                 if (file.exists()) {
                     file.delete();
@@ -353,6 +401,17 @@ public class HandlerRoomData {
                     e.printStackTrace();
                 }
             });
+            
+            if (!this.disabledRooms.isEmpty()) {
+                writer.write("DISABLED ROOMS");
+                this.disabledRooms.forEach((i) -> {
+                    try {
+                        writer.write(i + System.lineSeparator());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();

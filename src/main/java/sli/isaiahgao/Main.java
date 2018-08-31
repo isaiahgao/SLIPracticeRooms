@@ -16,6 +16,7 @@ import sli.isaiahgao.gui.GUI;
 import sli.isaiahgao.gui.GUIBase;
 import sli.isaiahgao.gui.GUIConfirm;
 import sli.isaiahgao.gui.GUIMessage;
+import sli.isaiahgao.gui.commands.CommandHandler;
 import sli.isaiahgao.io.ActionThread;
 import sli.isaiahgao.io.QueueIO;
 import sli.isaiahgao.io.SheetsIO;
@@ -25,6 +26,7 @@ public final class Main {
     private static ActionThread actionThread;
     private static HandlerRoomData handlerRoom;
     private static HandlerUserData handlerUsers;
+    private static CommandHandler handlerCommands;
     private static QueueIO ioQueue;
     private static Main instance;
     private static final String TEST_DB_ID = "1bESGU8NWtu4feYrR7bYHhIib2y_a5iNOJfwiDhcF6vI";
@@ -52,28 +54,9 @@ public final class Main {
         instance.base = new GUIBase(instance);
         
         handlerRoom.synchronize();
-        loadCurrentRooms();
-    }
-    
-    private static void loadCurrentRooms() {
-        try {
-            File file = new File("config.jhunions");
-            if (!file.exists())
-                return;
-            
-            Scanner sc = new Scanner(file);
-            List<String> data = new LinkedList<>();
-            while (sc.hasNextLine()) {
-                data.add(sc.nextLine());
-            }
-            sc.close();
-            
-            data.stream().forEach((s) -> {
-                handlerRoom.loadUser(s);
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        handlerRoom.loadCurrentRooms();
+        
+        handlerCommands = new CommandHandler(instance);
     }
     
     public static ActionThread getActionThread() {
@@ -86,6 +69,10 @@ public final class Main {
     
     public static HandlerUserData getUserHandler() {
         return handlerUsers;
+    }
+    
+    public static CommandHandler getCommandHandler() {
+        return handlerCommands;
     }
     
     public static QueueIO getIOQueue() {
