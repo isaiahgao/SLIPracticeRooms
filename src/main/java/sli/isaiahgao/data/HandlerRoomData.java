@@ -54,7 +54,7 @@ public class HandlerRoomData {
     public HandlerRoomData(Main instance) {
         this.instance = instance;
         this.currentUsers = new HashMap<>();
-        this.disabledRooms = new HashSet<>();
+        this.disabledRooms = new HashMap<>();
         
         Main.TIMER.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -70,7 +70,8 @@ public class HandlerRoomData {
     
     // user string id : userinstance
     private Map<String, UserInstance> currentUsers;
-    private Set<Integer> disabledRooms;
+    // room : reason for disabling
+    private Map<Integer, String> disabledRooms;
     private volatile int logsize;
     private Month month;
     
@@ -111,8 +112,8 @@ public class HandlerRoomData {
         return this.currentUsers.containsKey(id);
     }
     
-    public void disableRoom(int room) {
-        this.disabledRooms.add(room);
+    public void disableRoom(int room, String reason) {
+        this.disabledRooms.put(room, reason);
     }
     
     public synchronized void removeRoom(int room) {
@@ -193,6 +194,8 @@ public class HandlerRoomData {
                     }
                 }
             }
+            
+            this.writeCurrentUsers();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -369,7 +372,16 @@ public class HandlerRoomData {
             boolean disabled = false;
             for (String s : data) {
                 if (disabled) {
-                    this.disabledRooms.add(Integer.parseInt(s));
+                    String[] arr = s.split(" ");
+                    int room = Integer.parseInt(arr[0]);
+                    String reason = arr[1];
+                    for (int i = 2; i < arr.length; i++) {
+                        reason += " " + arr[i];
+                    }
+                    
+                    this.disabledRooms.put(room, reason);
+                    this.instance.getBaseGUI().getButtonByID(room).setEnabled(false);
+                    this.instance.getBaseGUI().setTimeForRoom(room, reason);
                 } else {
                     if (s.equals("DISABLED ROOMS")) {
                         disabled = true;
@@ -404,9 +416,10 @@ public class HandlerRoomData {
             
             if (!this.disabledRooms.isEmpty()) {
                 writer.write("DISABLED ROOMS");
-                this.disabledRooms.forEach((i) -> {
+                writer.write(System.lineSeparator());
+                this.disabledRooms.forEach((i, s) -> {
                     try {
-                        writer.write(i + System.lineSeparator());
+                        writer.write(i + " " + s + System.lineSeparator());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

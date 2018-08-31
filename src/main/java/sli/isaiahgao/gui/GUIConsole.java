@@ -94,7 +94,7 @@ public class GUIConsole extends GUI implements ActionListener {
     
     protected void handleCommand(String cmd) {
         if (!this.auth) {
-            consoleHistory.append(System.lineSeparator() + "> " + cmd.replaceAll("(.)", "*"));
+            consoleHistory.append(System.lineSeparator() + "> ****");
             if (cmd.equals(PASSWORD)) {
                 this.auth = true;
                 consoleHistory.append(System.lineSeparator() + "Password accepted! You may now use console.");

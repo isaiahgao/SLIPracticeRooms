@@ -43,9 +43,6 @@ public class CommandHandler {
             
             try {
                 int room = Integer.parseInt(args[1]);
-                instance.getBaseGUI().getButtonByID(room).setEnabled(false);
-                Main.getRoomHandler().disableRoom(room);
-                Main.getRoomHandler().writeCurrentUsers();
                 
                 String reason = args.length < 3 ? "UNAVAILABLE" : args[2];
                 if (args.length < 3) {
@@ -56,6 +53,10 @@ public class CommandHandler {
                         reason += " " + args[i];
                     }
                 }
+                
+                instance.getBaseGUI().getButtonByID(room).setEnabled(false);
+                Main.getRoomHandler().disableRoom(room, reason);
+                Main.getRoomHandler().writeCurrentUsers();
                 
                 instance.getBaseGUI().setTimeForRoom(room, reason);
                 return "Disabled room " + args[1] + " with reason \"" + reason + "\"";
