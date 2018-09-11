@@ -35,7 +35,7 @@ public class SheetsIO {
     private static final String CLIENT_SECRET_DIR = "client_secret.json";
     
     private static Sheets service;
-
+    
     /**
      * Creates an authorized Credential object.
      * 
@@ -59,7 +59,7 @@ public class SheetsIO {
         return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
     }
 
-    public static void init() throws Exception {
+    public static void refreshService() throws Exception {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
                 .setApplicationName(APPLICATION_NAME).build();

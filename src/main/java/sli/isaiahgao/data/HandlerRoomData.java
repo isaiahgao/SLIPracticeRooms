@@ -38,7 +38,7 @@ import sli.isaiahgao.io.SheetsIO;
 public class HandlerRoomData {
     
     public static void main(String[] args) throws Exception {
-        SheetsIO.init();
+        SheetsIO.refreshService();
         HandlerRoomData a = new HandlerRoomData(new Main());
         a.login(new UserData("1654535123", new FullName("Bob", "Bobbinson"), "bbob1", 1346587513l), 112);
         
@@ -145,53 +145,45 @@ public class HandlerRoomData {
             });
             
             Set<Integer> processed = new HashSet<>();
-            // reverse iterate
+            Set<Integer> checkedIn = new HashSet<>();
+            // reverse iterate through excel sheet
+            // find all the rooms that have been checked in
             for (int j = values.size() - 1; j > 0; j--) {
                 List<Object> list = values.get(j);
                 if (!list.isEmpty() && !this.isEmpty(list.get(0))) {
                     String[] arr = ((String) list.get(4)).split(" ");
+                    // too short to be worthwhile
                     if (arr.length < 2) {
                         continue;
                     }
                     
+                    // get room number
                     int room = Integer.parseInt(arr[1]);
+                    // check if already processed before
                     if (!processed.add(room)) {
-                        // already processed this room number
                         continue;
                     }
                     
+                    // check if still checked out
                     if (list.size() < 9 || this.isEmpty(list.get(8))) {
-                        // still checked out; don't care
                         continue;
-                    }
-                    
-                    // manually marked as returned;
-                    // 1. set button active again
-                    // 2. remove user from room data
-                    
-                    // remove user from map
-                    for (Iterator<UserInstance> it = this.currentUsers.values().iterator(); it.hasNext();) {
-                        UserInstance uis = it.next();
-                        processed.remove(uis.getRoom());
-                        if (uis.getRoom() == room) {
-                            it.remove();
-                            
-                            // set button active again
-                            this.instance.getBaseGUI().getButtonByID(room).setEnabled(true);
-                            this.instance.getBaseGUI().setTimeForRoom(room, null);
-                        }
                     }
 
-                    for (Iterator<UserInstance> it = this.currentUsers.values().iterator(); it.hasNext();) {
-                        UserInstance uis = it.next();
-                        if (processed.contains(uis.getRoom()) ) {
-                            it.remove();
-                            
-                            // set  button active again
-                            this.instance.getBaseGUI().getButtonByID(room).setEnabled(true);
-                            this.instance.getBaseGUI().setTimeForRoom(room, null);
-                        }
-                    }
+                    System.out.println("still checked in: " + room);
+                    checkedIn.add(room);
+                }
+            }
+            
+            // remove the checked-in ones from currentUsers
+            for (Iterator<UserInstance> it = this.currentUsers.values().iterator(); it.hasNext();) {
+                UserInstance uis = it.next();
+                int room = uis.getRoom();
+                if (checkedIn.remove(room) && !this.disabledRooms.containsKey(room)) {
+                    it.remove();
+                    
+                    // set button active again
+                    this.instance.getBaseGUI().getButtonByID(room).setEnabled(true);
+                    this.instance.getBaseGUI().setTimeForRoom(room, null);
                 }
             }
             
@@ -356,6 +348,7 @@ public class HandlerRoomData {
         this.writeCurrentUsers();
     }
     
+    // loads data from config file
     public void loadCurrentRooms() {
         try {
             File file = new File("config.jhunions");
@@ -395,6 +388,7 @@ public class HandlerRoomData {
         }
     }
     
+    // writes current state to config file
     public synchronized void writeCurrentUsers() {
         try {
             if (this.currentUsers.isEmpty() && this.disabledRooms.isEmpty()) {

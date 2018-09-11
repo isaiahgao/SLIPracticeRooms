@@ -34,10 +34,9 @@ public final class Main {
 
     public static void main(String[] args) {
         try {
-            SheetsIO.init();
+            SheetsIO.refreshService();
         } catch (Exception e) {
             e.printStackTrace();
-            System.exit(1);
         }
         
         actionThread = new ActionThread();
@@ -47,11 +46,23 @@ public final class Main {
         handlerUsers.load();
         ioQueue = new QueueIO();
         instance.base = new GUIBase(instance);
-        
-        handlerRoom.synchronize();
+
         handlerRoom.loadCurrentRooms();
+        //handlerRoom.synchronize();
         
         handlerCommands = new CommandHandler(instance);
+        
+        TIMER.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    SheetsIO.refreshService();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            // refresh every half hour
+        }, 60l * 30l * 1000l, 60l * 30l * 1000l);
     }
     
     public static ActionThread getActionThread() {

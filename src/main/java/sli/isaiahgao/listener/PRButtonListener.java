@@ -23,14 +23,16 @@ public class PRButtonListener implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (this.butt.getBackground() == SELECTED) {
+        if (this.butt.isSelected()) {
             this.parent.setPressedButton(null);
-            this.butt.setBackground(DESELECTED);
+            this.butt.setSelected(false);
+            //this.butt.setBackground(DESELECTED);
             this.butt.validate();
             return;
         }
 
-        this.butt.setBackground(SELECTED);
+        this.butt.setSelected(true);
+        //this.butt.setBackground(SELECTED);
         this.butt.validate();
         this.parent.setPressedButton(this.butt);
     }

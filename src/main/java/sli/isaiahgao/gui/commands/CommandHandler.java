@@ -31,6 +31,9 @@ public class CommandHandler {
                 return "Enabled room " + args[1];
             } catch (NumberFormatException e) {
                 return "Invalid room specified: " + args[1];
+            } catch (Exception e) {
+                e.printStackTrace();
+                return "Unknown error: " + e.getClass().getSimpleName();
             }
         };
         commands.put("enable", enable);
@@ -62,6 +65,9 @@ public class CommandHandler {
                 return "Disabled room " + args[1] + " with reason \"" + reason + "\"";
             } catch (NumberFormatException e) {
                 return "Invalid room specified: " + args[1];
+            } catch (Exception e) {
+                e.printStackTrace();
+                return "Unknown error: " + e.getClass().getSimpleName();
             }
         };
         commands.put("disable", disable);

@@ -20,7 +20,7 @@ public class ActionThread extends Thread {
     }
     
     @Override
-    public void run() {
+    public synchronized void run() {
         while (true) {
             while (this.actions.isEmpty()) {
                 try {
@@ -37,8 +37,8 @@ public class ActionThread extends Thread {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                ait.remove();
             }
+            this.actions.clear();
         }
     }
 
