@@ -389,6 +389,7 @@ public class GUIBase extends GUI implements ActionListener {
         JButton butt = new JButton(getTitle(roomNo, null), new ImageIcon(PracticeRoomButton.NORMAL_NORMAL.getImage()));
         butt.setPressedIcon(new ImageIcon(PracticeRoomButton.NORMAL_PRESSED.getImage()));
         butt.setSelectedIcon(new ImageIcon(PracticeRoomButton.NORMAL_SELECTED.getImage()));
+        butt.setDisabledIcon(new ImageIcon(PracticeRoomButton.NORMAL_DISABLED.getImage()));
         butt.setVerticalTextPosition(JButton.CENTER);
         butt.setHorizontalTextPosition(JButton.CENTER);
         

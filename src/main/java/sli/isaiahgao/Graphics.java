@@ -11,6 +11,7 @@ public class Graphics {
         NORMAL_NORMAL("/blubutt.png"),
         NORMAL_PRESSED("/blubutt_pressed.png"),
         NORMAL_SELECTED("/blubutt_selected.png"),
+        NORMAL_DISABLED("/blubutt_disabled.png"),
         LONG_NORMAL("/longbutt.png"),
         LONG_PRESSED("/longbutt_pressed.png"),
         LONG_SELECTED("/longbutt_selected.png");
