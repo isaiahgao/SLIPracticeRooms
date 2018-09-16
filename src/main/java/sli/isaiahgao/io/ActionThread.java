@@ -1,7 +1,6 @@
 package sli.isaiahgao.io;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,23 +21,25 @@ public class ActionThread extends Thread {
     @Override
     public synchronized void run() {
         while (true) {
-            while (this.actions.isEmpty()) {
+            if (this.actions.isEmpty()) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                continue;
             }
             
-            for (Iterator<Action> ait = this.actions.iterator(); ait.hasNext();) {
-                Action a = ait.next();
+            List<Action> la = new LinkedList<>(this.actions);
+            this.actions.clear();
+            
+            for (Action a : la) {
                 try {
                     a.run();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            this.actions.clear();
         }
     }
 

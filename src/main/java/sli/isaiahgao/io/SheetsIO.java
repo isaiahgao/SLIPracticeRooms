@@ -48,7 +48,6 @@ public class SheetsIO {
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         // Load client secrets.
         InputStream in = Main.class.getClassLoader().getResourceAsStream(CLIENT_SECRET_DIR);
-        System.out.println(in == null);
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
         // Build flow and trigger user authorization request.
