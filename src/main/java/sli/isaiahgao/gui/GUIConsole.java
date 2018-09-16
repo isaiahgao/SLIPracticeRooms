@@ -37,10 +37,9 @@ public class GUIConsole extends GUI implements ActionListener {
     public GUIConsole(Main instance) {
         super(instance, "Console", 300, 400, JFrame.DISPOSE_ON_CLOSE, true);
         
-        this.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(0 + ""), 0);
         this.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-            .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 0);
-        this.getActionMap().put(0, new AbstractAction() {
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 99999);
+        this.getActionMap().put(99999, new AbstractAction() {
             private static final long serialVersionUID = 7830455644315L;
 
             @Override

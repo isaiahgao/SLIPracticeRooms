@@ -83,9 +83,8 @@ public class HandlerRoomData {
      * Handle an ID scan.
      * @param id The user's string ID.
      * @param room The room the user is checking out, or 0 if none.
-     * @return Result of action, either LOG_IN or LOG_OUT.
      */
-    public synchronized ActionResult scan(UserData usd, int room) {
+    public synchronized void scan(UserData usd, int room) {
         UserInstance inst = this.currentUsers.get(usd.getHopkinsID());
         if (inst != null) {
             this.logout(inst);
@@ -94,14 +93,14 @@ public class HandlerRoomData {
             instance.sendDisappearingConfirm("Returned<br>Practice Room " + inst.getRoom() + "!", 115);
             
             Sound.SIGN_OUT.play();
-            return ActionResult.LOG_OUT;
+            return;
         }
         
         this.login(usd, room);
         instance.getBaseGUI().getButtonByID(room).setEnabled(false);
         instance.sendDisappearingConfirm("Checked out<br>Practice Room " + this.instance.getBaseGUI().getPressedButtonID() + "!", 115);
         Sound.SIGN_IN.play();
-        return ActionResult.LOG_IN;
+        return;
     }
     
     public synchronized UserInstance getUserInstance(String id) {
@@ -225,15 +224,15 @@ public class HandlerRoomData {
     
     // fill in Time In and Monitor Initials in database
     private synchronized void poll(UserInstance inst) {
+        Spreadsheets accessor = SheetsIO.getService().spreadsheets();
+        String range = inst.getSheetName() + "!H" + inst.getLine() + ":I" + inst.getLine();
+        
+        List<List<Object>> values = Arrays.asList(Arrays.asList(
+                Utils.getTime(new Date()), "AUTO LOG"
+                ));
+        ValueRange vr = new ValueRange().setValues(values);
+        
         Action action = () -> {
-            Spreadsheets accessor = SheetsIO.getService().spreadsheets();
-            String range = inst.getSheetName() + "!H" + inst.getLine() + ":I" + inst.getLine();
-            
-            List<List<Object>> values = Arrays.asList(Arrays.asList(
-                    Utils.getTime(new Date()), "AUTO LOG"
-                    ));
-            ValueRange vr = new ValueRange().setValues(values);
-            
             accessor.values().update(Main.getLogURL(), range, vr)
             .setValueInputOption("RAW")
             .execute();
@@ -251,29 +250,29 @@ public class HandlerRoomData {
     
     // fill in user data
     private synchronized void logUser( UserInstance inst) {
-        Action action = () -> {
-            Spreadsheets accessor = SheetsIO.getService().spreadsheets();
-            
-            if (this.logsize == 0) {
-                try {
-                    ValueRange vr = accessor.values().get(Main.getLogURL(), "A:A").execute();
-                    this.logsize = vr.getValues() == null ? 0 : vr.getValues().size();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        Spreadsheets accessor = SheetsIO.getService().spreadsheets();
+        
+        if (this.logsize == 0) {
+            try {
+                ValueRange vr = accessor.values().get(Main.getLogURL(), "A:A").execute();
+                this.logsize = vr.getValues() == null ? 0 : vr.getValues().size();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            this.incLog();
-            // save line that we're putting data on
-            inst.setLine(this.logsize);
-            
-            
-            // save to db
-            List<List<Object>> values = Arrays.asList(
-                    inst.toObjectList()
-            );
-            String range = "A" + this.logsize + ":J" + this.logsize;
-            ValueRange body = new ValueRange().setValues(values);
-            
+        }
+        this.incLog();
+        // save line that we're putting data on
+        inst.setLine(this.logsize);
+        
+        
+        // save to db
+        List<List<Object>> values = Arrays.asList(
+                inst.toObjectList()
+        );
+        String range = "A" + this.logsize + ":J" + this.logsize;
+        ValueRange body = new ValueRange().setValues(values);
+        
+        Action action = () -> {
             accessor.values()
                 .update(Main.getLogURL(), range, body)
                 .setValueInputOption("RAW")

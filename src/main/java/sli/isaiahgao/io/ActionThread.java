@@ -14,7 +14,7 @@ public class ActionThread extends Thread {
         this.start();
     }
     
-    public synchronized void addAction(Action a) {
+    public void addAction(Action a) {
         actions.add(a);
     }
     
@@ -36,9 +36,16 @@ public class ActionThread extends Thread {
             for (Action a : la) {
                 try {
                     a.run();
-                } catch (IOException e) {
+                    Thread.sleep(100);
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
+            
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }

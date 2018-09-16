@@ -91,16 +91,8 @@ public class GUIBase extends GUI implements ActionListener {
     }
 
     public void scanID(String id) {
-        System.out.println(id);
+        System.out.println("Scanned ID: " + id);
         this.curId = id;
-        /*
-        // cut off first and last digit, which are ; and ?
-        if (id.charAt(0) == ';') {
-            id = id.substring(1);
-        }
-        if (id.charAt(id.length() - 1) == '?') {
-            id = id.substring(0, id.length() - 1);
-        }*/
         
         if (Main.getRoomHandler().usingRoom(id)) {
             // sign out if using a room
@@ -280,7 +272,6 @@ public class GUIBase extends GUI implements ActionListener {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    System.out.println("key pressed " + j);
                     if (!in.add(j)) {
                         GUIBase.this.scanID(in.toString());
                         in.setCollecting(false);
@@ -314,47 +305,6 @@ public class GUIBase extends GUI implements ActionListener {
                 new GUIConsole(instance);
             }
         });
-        
-        
-        // new version of tapper doesn't prefix with ; and end with ? anymore
-        /*c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(';'), "start");
-        c.getActionMap().put("start", new AbstractAction() {
-            private static final long serialVersionUID = 8708730083077254773L;
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("started collection");
-                in.setCollecting(true);
-            }
-        });
-        for (int i = 0; i < 10; i++) {
-            c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(i + ""), i);
-            c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-                    .put(KeyStroke.getKeyStroke((int) Utils.getField(KeyEvent.class, null, "VK_NUMPAD" + i), 0), i);
-
-            final int j = i;
-            c.getActionMap().put(i, new AbstractAction() {
-                private static final long serialVersionUID = 1148616746542133372L;
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    System.out.println("key pressed " + j);
-                    in.add(j);
-                }
-            });
-        }
-        c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke('?'), "stop");
-        c.getActionMap().put("stop", new AbstractAction() {
-            private static final long serialVersionUID = 5914194104905979306L;
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("stopped collection");
-                if (!in.isEmpty())
-                    scanID(in.toString());
-                in.setCollecting(false);
-            }
-        });*/
     }
     
     private void addPracticeRoomButton(int id, String title, int x, int y, int width, int height) {

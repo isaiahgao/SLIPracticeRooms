@@ -52,7 +52,7 @@ public final class Main {
         
         handlerCommands = new CommandHandler(instance);
         
-        TIMER.schedule(new TimerTask() {
+        /*TIMER.schedule(new TimerTask() {
             @Override
             public void run() {
                 try {
@@ -62,7 +62,7 @@ public final class Main {
                 }
             }
             // refresh every half hour
-        }, 60l * 30l * 1000l, 60l * 30l * 1000l);
+        }, 60l * 30l * 1000l, 60l * 30l * 1000l);*/
     }
     
     public static ActionThread getActionThread() {
