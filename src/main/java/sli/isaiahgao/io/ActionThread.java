@@ -14,7 +14,7 @@ public class ActionThread extends Thread {
         this.start();
     }
     
-    public void addAction(Action a) {
+    public synchronized void addAction(Action a) {
         actions.add(a);
     }
     

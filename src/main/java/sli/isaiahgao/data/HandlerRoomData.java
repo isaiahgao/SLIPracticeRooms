@@ -127,6 +127,7 @@ public class HandlerRoomData {
     }
 
     // sync program to spreadsheet
+    @Deprecated
     public synchronized void synchronize() {
         try {
             ValueRange vr = SheetsIO.getService().spreadsheets().values().get(Main.getLogURL(), "A:I").execute();
@@ -224,14 +225,15 @@ public class HandlerRoomData {
     
     // fill in Time In and Monitor Initials in database
     private synchronized void poll(UserInstance inst) {
-        Spreadsheets accessor = SheetsIO.getService().spreadsheets();
-        String range = inst.getSheetName() + "!H" + inst.getLine() + ":I" + inst.getLine();
-        
-        List<List<Object>> values = Arrays.asList(Arrays.asList(
-                Utils.getTime(new Date()), "AUTO LOG"
-                ));
-        ValueRange vr = new ValueRange().setValues(values);
         Action action = () -> {
+            Spreadsheets accessor = SheetsIO.getService().spreadsheets();
+            String range = inst.getSheetName() + "!H" + inst.getLine() + ":I" + inst.getLine();
+            
+            List<List<Object>> values = Arrays.asList(Arrays.asList(
+                    Utils.getTime(new Date()), "AUTO LOG"
+                    ));
+            ValueRange vr = new ValueRange().setValues(values);
+            
             accessor.values().update(Main.getLogURL(), range, vr)
             .setValueInputOption("RAW")
             .execute();
@@ -243,33 +245,35 @@ public class HandlerRoomData {
     
     // handle IO for logging in
     private synchronized void push(UserInstance inst) {
-        Spreadsheets accessor = SheetsIO.getService().spreadsheets();
-        this.checkMonth(accessor);
-        this.logUser(accessor, inst);
+        this.checkMonth();
+        this.logUser(inst);
     }
     
     // fill in user data
-    private synchronized void logUser(Spreadsheets accessor, UserInstance inst) {
-        if (this.logsize == 0) {
-            try {
-                ValueRange vr = accessor.values().get(Main.getLogURL(), "A:A").execute();
-                this.logsize = vr.getValues() == null ? 0 : vr.getValues().size();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        this.incLog();
-        // save line that we're putting data on
-        inst.setLine(this.logsize);
-        
-        
-        // save to db
-        List<List<Object>> values = Arrays.asList(
-                inst.toObjectList()
-        );
-        String range = "A" + this.logsize + ":J" + this.logsize;
-        ValueRange body = new ValueRange().setValues(values);
+    private synchronized void logUser( UserInstance inst) {
         Action action = () -> {
+            Spreadsheets accessor = SheetsIO.getService().spreadsheets();
+            
+            if (this.logsize == 0) {
+                try {
+                    ValueRange vr = accessor.values().get(Main.getLogURL(), "A:A").execute();
+                    this.logsize = vr.getValues() == null ? 0 : vr.getValues().size();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            this.incLog();
+            // save line that we're putting data on
+            inst.setLine(this.logsize);
+            
+            
+            // save to db
+            List<List<Object>> values = Arrays.asList(
+                    inst.toObjectList()
+            );
+            String range = "A" + this.logsize + ":J" + this.logsize;
+            ValueRange body = new ValueRange().setValues(values);
+            
             accessor.values()
                 .update(Main.getLogURL(), range, body)
                 .setValueInputOption("RAW")
@@ -281,8 +285,9 @@ public class HandlerRoomData {
     }
     
     // check if a new month is needed
-    private synchronized void checkMonth(Spreadsheets accessor) {
+    private synchronized void checkMonth() {
         Action bulk = () -> {
+            Spreadsheets accessor = SheetsIO.getService().spreadsheets();
             if (this.month == null || Month.of(Calendar.getInstance().get(Calendar.MONTH) + 1) != this.month) {
                 // see if we need to create a new spreadsheet
                 this.month = Month.of(Calendar.getInstance().get(Calendar.MONTH) + 1);
