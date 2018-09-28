@@ -5,6 +5,7 @@ import sli.isaiahgao.gui.GUIBase;
 public class InputCollector {
     
     private static final int ID_LENGTH = 15;
+    private static final int GRAD_ID_LENGTH = 11;
 
     public InputCollector(GUIBase base) {
         this.empty();
@@ -13,6 +14,8 @@ public class InputCollector {
 
     private boolean collecting;
     private boolean enabled;
+    private boolean isGradStudent;
+    
     private StringBuilder buf;
     private long lastCollected = -1;
     private long lastKeystroke = -1;
@@ -65,8 +68,18 @@ public class InputCollector {
             this.lastCollected = System.currentTimeMillis();
         }
         
-        buf.append(s);
+        // check if grad student id
+        if (buf.length() == 4 && s.equals("-")) {
+            this.isGradStudent = true;
+        } else {
+            buf.append(s);
+        }
         lastKeystroke = System.currentTimeMillis();
+        
+        if (this.isGradStudent && buf.length() == GRAD_ID_LENGTH) {
+            this.buf.delete(GRAD_ID_LENGTH - 1, GRAD_ID_LENGTH);
+            return false;
+        }
         
         if (buf.length() == ID_LENGTH) {
             buf.append("0");

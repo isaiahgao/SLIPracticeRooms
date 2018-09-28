@@ -305,6 +305,22 @@ public class GUIBase extends GUI implements ActionListener {
                 new GUIConsole(instance);
             }
         });
+
+        // dash for grad students
+        c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(13 + ""), 13);
+        c.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+            .put(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, 0), 13);
+        c.getActionMap().put(13, new AbstractAction() {
+            private static final long serialVersionUID = 78304556274444315L;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!in.add("-")) {
+                    GUIBase.this.scanID(in.toString());
+                    in.setCollecting(false);
+                }
+            }
+        });
     }
     
     private void addPracticeRoomButton(int id, String title, int x, int y, int width, int height) {

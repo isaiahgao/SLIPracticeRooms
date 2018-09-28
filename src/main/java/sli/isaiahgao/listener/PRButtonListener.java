@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 
+import sli.isaiahgao.SoundHandler.Sound;
 import sli.isaiahgao.gui.GUIBase;
 
 public class PRButtonListener implements ActionListener {
@@ -34,6 +35,12 @@ public class PRButtonListener implements ActionListener {
         this.butt.setSelected(true);
         //this.butt.setBackground(SELECTED);
         this.butt.validate();
+        
+        try {
+            Sound.valueOf("R" + this.butt.getName()).play();
+        } catch (Exception ex) {
+            // ignore
+        }
         this.parent.setPressedButton(this.butt);
     }
 

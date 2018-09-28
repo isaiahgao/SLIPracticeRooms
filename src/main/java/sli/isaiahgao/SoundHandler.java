@@ -14,7 +14,17 @@ public class SoundHandler {
         SIGN_OUT,
         ERROR,
         REGISTER_SUCCESSFUL,
-        REGISTER_UNSUCCESSFUL;
+        REGISTER_UNSUCCESSFUL,
+        R109,
+        R110,
+        R111,
+        R112,
+        R114,
+        R115,
+        R116,
+        R117,
+        R118,
+        R119;
         
         public void play() {
             try {
