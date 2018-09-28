@@ -91,7 +91,6 @@ public class HandlerUserData {
                     UserData usd = UserData.fromSheetsRow(row);
                     database.put(usd.getHopkinsID(), usd);
                     databasePositions.put(usd.getHopkinsID(), this.incdbpos());
-                    System.out.println(usd.toString());
                 }
                 System.out.println("Loaded " + database.size() + " registered users!");
             }

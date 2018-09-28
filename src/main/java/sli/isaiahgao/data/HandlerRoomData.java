@@ -87,18 +87,17 @@ public class HandlerRoomData {
     public synchronized void scan(UserData usd, int room) {
         UserInstance inst = this.currentUsers.get(usd.getHopkinsID());
         if (inst != null) {
+            Sound.SIGN_OUT.play();
             instance.getBaseGUI().getButtonByID(inst.getRoom()).setEnabled(true);
             instance.getBaseGUI().setTimeForRoom(inst.getRoom(), null);
             instance.sendDisappearingConfirm("Returned<br>Practice Room " + inst.getRoom() + "!", 115);
-            
-            Sound.SIGN_OUT.play();
             this.logout(inst);
             return;
         }
-        
+
+        Sound.SIGN_IN.play();
         instance.getBaseGUI().getButtonByID(room).setEnabled(false);
         instance.sendDisappearingConfirm("Checked out<br>Practice Room " + this.instance.getBaseGUI().getPressedButtonID() + "!", 115);
-        Sound.SIGN_IN.play();
         this.login(usd, room);
         return;
     }
