@@ -33,7 +33,7 @@ public class GUIBase extends GUI implements ActionListener {
     private static final long serialVersionUID = 2161473071392557910L;
 
     public GUIBase(Main instance) {
-        super(instance, "JHUnions Practice Rooms BETA v0.4", 1280, 1024, JFrame.EXIT_ON_CLOSE, true);
+        super(instance, "JHUnions Practice Rooms BETA v0.5", 1280, 1024, JFrame.EXIT_ON_CLOSE, true);
         this.setBackground(new Color(18, 18, 42));
         //this.frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
     }
